@@ -82,17 +82,33 @@ class StudentController extends Controller
             'section_id' => 'required|exists:sections,id',
             'phone' => 'nullable|string',
             'email' => 'nullable|email',
+            'password' => 'nullable|string|min:6',
         ]);
+
+        $userId = null;
+        if (!empty($validated['email'])) {
+            $user = \App\Models\User::create([
+                'school_id' => $schoolId,
+                'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+                'email' => $validated['email'],
+                'password' => \Illuminate\Support\Facades\Hash::make($request->password ?: 'password123'),
+                'role_name' => 'student',
+                'phone' => $validated['phone'] ?? null,
+                'status' => 'active',
+            ]);
+            $userId = $user->id;
+        }
 
         $admissionNo = 'GVIS-' . date('Y') . '-' . rand(1000, 9999);
 
         Student::create(array_merge($validated, [
             'school_id' => $schoolId,
+            'user_id' => $userId,
             'admission_number' => $admissionNo,
             'status' => 'active',
         ]));
 
-        return redirect()->route('admin.students.index')->with('success', 'Student added successfully with Admission No: ' . $admissionNo);
+        return redirect()->route('admin.students.index')->with('success', 'Student profile added successfully! Admission No: ' . $admissionNo . ($userId ? ' | Portal Login Password: ' . ($request->password ?: 'password123') : ''));
     }
 
     public function update(Request $request, $id)

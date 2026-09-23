@@ -17,8 +17,9 @@ class SettingController extends Controller
         $school = School::with('settings')->find($schoolId);
         $roles = Role::with('permissions')->get();
         $permissions = Permission::all()->groupBy('group');
+        $users = \App\Models\User::where('school_id', $schoolId)->orWhereNull('school_id')->latest()->get();
 
-        return view('admin.settings.index', compact('school', 'roles', 'permissions'));
+        return view('admin.settings.index', compact('school', 'roles', 'permissions', 'users'));
     }
 
     public function updateSettings(Request $request)
@@ -84,5 +85,30 @@ class SettingController extends Controller
         $role->delete();
 
         return redirect()->route('admin.settings.index')->with('success', 'User Role deleted successfully.');
+    }
+
+    public function storeUserAccount(Request $request)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'role_name' => 'required|string',
+            'password' => 'required|string|min:6',
+            'phone' => 'nullable|string',
+        ]);
+
+        \App\Models\User::create([
+            'school_id' => $schoolId,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role_name' => $validated['role_name'],
+            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'phone' => $validated['phone'],
+            'status' => 'active',
+        ]);
+
+        return redirect()->route('admin.settings.index')->with('success', 'User account for ' . ucfirst(str_replace('_', ' ', $validated['role_name'])) . ' created successfully! They can now log in with email: ' . $validated['email']);
     }
 }

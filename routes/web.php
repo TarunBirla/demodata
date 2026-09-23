@@ -272,4 +272,5 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/settings/roles', [SettingController::class, 'storeRole'])->name('settings.role.store')->middleware('role:super_admin');
     Route::put('/settings/roles/{id}', [SettingController::class, 'updateRole'])->name('settings.role.update')->middleware('role:super_admin');
     Route::delete('/settings/roles/{id}', [SettingController::class, 'destroyRole'])->name('settings.role.destroy')->middleware('role:super_admin');
+    Route::post('/settings/users', [SettingController::class, 'storeUserAccount'])->name('settings.user.store')->middleware('role:super_admin');
 });

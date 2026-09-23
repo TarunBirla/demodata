@@ -26,17 +26,35 @@ class TeacherController extends Controller
             'phone' => 'nullable|string|max:50',
             'qualification' => 'nullable|string|max:255',
             'designation' => 'required|string|max:255',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $user = \App\Models\User::create([
+            'school_id' => $schoolId,
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'email' => $validated['email'],
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password ?: 'password123'),
+            'role_name' => 'teacher',
+            'phone' => $validated['phone'] ?? null,
+            'status' => 'active',
         ]);
 
         $empId = 'EMP-' . rand(1000, 9999);
 
-        Teacher::create(array_merge($validated, [
+        Teacher::create([
             'school_id' => $schoolId,
+            'user_id' => $user->id,
             'employee_id' => $empId,
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'qualification' => $validated['qualification'] ?? null,
+            'designation' => $validated['designation'],
             'status' => 'active',
-        ]));
+        ]);
 
-        return redirect()->route('admin.teachers.index')->with('success', 'Teacher profile added successfully!');
+        return redirect()->route('admin.teachers.index')->with('success', 'Teacher profile and portal User login created successfully! Password: ' . ($request->password ?: 'password123'));
     }
 
     public function update(Request $request, $id)

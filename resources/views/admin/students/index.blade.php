@@ -141,6 +141,12 @@
             <div class="col-md-6">
                 <x-input name="phone" label="Contact Phone" placeholder="+91 98765 43210" />
             </div>
+            <div class="col-md-6">
+                <x-input name="email" label="Student Portal Email" type="email" placeholder="student@juniorgurukul.in" />
+            </div>
+            <div class="col-md-6">
+                <x-input name="password" label="Portal Login Password" type="password" placeholder="Default: password123" />
+            </div>
         </div>
         <div class="text-end mt-3">
             <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</button>
