@@ -175,100 +175,101 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Students
-    Route::get('/students', [StudentController::class, 'index'])->name('students.index');
-    Route::get('/students/create', [StudentController::class, 'create'])->name('students.create')->middleware('role:school_admin,super_admin');
-    Route::post('/students', [StudentController::class, 'store'])->name('students.store')->middleware('role:school_admin,super_admin');
+    Route::get('/students', [StudentController::class, 'index'])->name('students.index')->middleware('role:super_admin,school_admin,teacher,accountant,librarian,transport_manager,hr_manager');
+    Route::get('/students/create', [StudentController::class, 'create'])->name('students.create')->middleware('role:super_admin,school_admin');
+    Route::post('/students', [StudentController::class, 'store'])->name('students.store')->middleware('role:super_admin,school_admin');
     Route::get('/students/{id}', [StudentController::class, 'show'])->name('students.show');
-    Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy')->middleware('role:school_admin,super_admin');
+    Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy')->middleware('role:super_admin,school_admin');
 
-    // Teachers & Staff (Admin Only)
-    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index')->middleware('role:school_admin,super_admin');
-    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store')->middleware('role:school_admin,super_admin');
-    Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy')->middleware('role:school_admin,super_admin');
+    // Teachers & Staff
+    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index')->middleware('role:super_admin,school_admin,hr_manager');
+    Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store')->middleware('role:super_admin,school_admin,hr_manager');
+    Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update')->middleware('role:super_admin,school_admin,hr_manager');
+    Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy')->middleware('role:super_admin,school_admin,hr_manager');
 
     // Academics (Classes, Sections & Subjects)
-    Route::get('/classes', [ClassController::class, 'index'])->name('classes.index');
-    Route::post('/classes', [ClassController::class, 'store'])->name('classes.store')->middleware('role:school_admin,super_admin');
-    Route::put('/classes/{id}', [ClassController::class, 'update'])->name('classes.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/classes/{id}', [ClassController::class, 'destroy'])->name('classes.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/classes', [ClassController::class, 'index'])->name('classes.index')->middleware('role:super_admin,school_admin,teacher');
+    Route::post('/classes', [ClassController::class, 'store'])->name('classes.store')->middleware('role:super_admin,school_admin');
+    Route::put('/classes/{id}', [ClassController::class, 'update'])->name('classes.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/classes/{id}', [ClassController::class, 'destroy'])->name('classes.destroy')->middleware('role:super_admin,school_admin');
     
-    Route::post('/sections', [ClassController::class, 'storeSection'])->name('sections.store')->middleware('role:school_admin,super_admin');
-    Route::put('/sections/{id}', [ClassController::class, 'updateSection'])->name('sections.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/sections/{id}', [ClassController::class, 'destroySection'])->name('sections.destroy')->middleware('role:school_admin,super_admin');
+    Route::post('/sections', [ClassController::class, 'storeSection'])->name('sections.store')->middleware('role:super_admin,school_admin');
+    Route::put('/sections/{id}', [ClassController::class, 'updateSection'])->name('sections.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/sections/{id}', [ClassController::class, 'destroySection'])->name('sections.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
-    Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store')->middleware('role:school_admin,super_admin,teacher');
-    Route::put('/subjects/{id}', [SubjectController::class, 'update'])->name('subjects.update')->middleware('role:school_admin,super_admin,teacher');
-    Route::delete('/subjects/{id}', [SubjectController::class, 'destroy'])->name('subjects.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index')->middleware('role:super_admin,school_admin,teacher');
+    Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store')->middleware('role:super_admin,school_admin,teacher');
+    Route::put('/subjects/{id}', [SubjectController::class, 'update'])->name('subjects.update')->middleware('role:super_admin,school_admin,teacher');
+    Route::delete('/subjects/{id}', [SubjectController::class, 'destroy'])->name('subjects.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::get('/timetable', [TimetableController::class, 'index'])->name('timetable.index');
-    Route::post('/timetable', [TimetableController::class, 'store'])->name('timetable.store')->middleware('role:school_admin,super_admin');
-    Route::put('/timetable/{id}', [TimetableController::class, 'update'])->name('timetable.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/timetable/{id}', [TimetableController::class, 'destroy'])->name('timetable.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/timetable', [TimetableController::class, 'index'])->name('timetable.index')->middleware('role:super_admin,school_admin,teacher,student,parent');
+    Route::post('/timetable', [TimetableController::class, 'store'])->name('timetable.store')->middleware('role:super_admin,school_admin');
+    Route::put('/timetable/{id}', [TimetableController::class, 'update'])->name('timetable.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/timetable/{id}', [TimetableController::class, 'destroy'])->name('timetable.destroy')->middleware('role:super_admin,school_admin');
 
     // Attendance
-    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
-    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store')->middleware('role:school_admin,super_admin,teacher');
-    Route::delete('/attendance/{id}', [AttendanceController::class, 'destroy'])->name('attendance.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index')->middleware('role:super_admin,school_admin,teacher,student,parent');
+    Route::post('/attendance', [AttendanceController::class, 'store'])->name('attendance.store')->middleware('role:super_admin,school_admin,teacher');
+    Route::delete('/attendance/{id}', [AttendanceController::class, 'destroy'])->name('attendance.destroy')->middleware('role:super_admin,school_admin');
 
     // Fees
-    Route::get('/fees', [FeeController::class, 'index'])->name('fees.index')->middleware('role:school_admin,super_admin,student,parent');
-    Route::post('/fees/collect', [FeeController::class, 'collect'])->name('fees.collect')->middleware('role:school_admin,super_admin');
-    Route::post('/fees/structure', [FeeController::class, 'storeStructure'])->name('fees.structure.store')->middleware('role:school_admin,super_admin');
-    Route::put('/fees/structure/{id}', [FeeController::class, 'updateStructure'])->name('fees.structure.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/fees/structure/{id}', [FeeController::class, 'destroyStructure'])->name('fees.structure.destroy')->middleware('role:school_admin,super_admin');
-    Route::delete('/fees/payment/{id}', [FeeController::class, 'destroyPayment'])->name('fees.payment.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/fees', [FeeController::class, 'index'])->name('fees.index')->middleware('role:super_admin,school_admin,accountant,student,parent');
+    Route::post('/fees/collect', [FeeController::class, 'collect'])->name('fees.collect')->middleware('role:super_admin,school_admin,accountant');
+    Route::post('/fees/structure', [FeeController::class, 'storeStructure'])->name('fees.structure.store')->middleware('role:super_admin,school_admin,accountant');
+    Route::put('/fees/structure/{id}', [FeeController::class, 'updateStructure'])->name('fees.structure.update')->middleware('role:super_admin,school_admin,accountant');
+    Route::delete('/fees/structure/{id}', [FeeController::class, 'destroyStructure'])->name('fees.structure.destroy')->middleware('role:super_admin,school_admin');
+    Route::delete('/fees/payment/{id}', [FeeController::class, 'destroyPayment'])->name('fees.payment.destroy')->middleware('role:super_admin,school_admin');
 
     // Exams & Marks
-    Route::get('/exams', [ExamController::class, 'index'])->name('exams.index');
-    Route::post('/exams', [ExamController::class, 'store'])->name('exams.store')->middleware('role:school_admin,super_admin');
-    Route::put('/exams/{id}', [ExamController::class, 'update'])->name('exams.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/exams/{id}', [ExamController::class, 'destroy'])->name('exams.destroy')->middleware('role:school_admin,super_admin');
-    Route::post('/exams/marks', [ExamController::class, 'storeMarks'])->name('exams.marks.store')->middleware('role:school_admin,super_admin,teacher');
-    Route::delete('/exams/marks/{id}', [ExamController::class, 'destroyMarks'])->name('exams.marks.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/exams', [ExamController::class, 'index'])->name('exams.index')->middleware('role:super_admin,school_admin,teacher,student,parent');
+    Route::post('/exams', [ExamController::class, 'store'])->name('exams.store')->middleware('role:super_admin,school_admin');
+    Route::put('/exams/{id}', [ExamController::class, 'update'])->name('exams.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/exams/{id}', [ExamController::class, 'destroy'])->name('exams.destroy')->middleware('role:super_admin,school_admin');
+    Route::post('/exams/marks', [ExamController::class, 'storeMarks'])->name('exams.marks.store')->middleware('role:super_admin,school_admin,teacher');
+    Route::delete('/exams/marks/{id}', [ExamController::class, 'destroyMarks'])->name('exams.marks.destroy')->middleware('role:super_admin,school_admin');
 
     // Communication & Homework
     Route::get('/notices', [NoticeController::class, 'index'])->name('notices.index');
-    Route::post('/notices', [NoticeController::class, 'store'])->name('notices.store')->middleware('role:school_admin,super_admin');
-    Route::put('/notices/{id}', [NoticeController::class, 'update'])->name('notices.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/notices/{id}', [NoticeController::class, 'destroy'])->name('notices.destroy')->middleware('role:school_admin,super_admin');
+    Route::post('/notices', [NoticeController::class, 'store'])->name('notices.store')->middleware('role:super_admin,school_admin,hr_manager,librarian,transport_manager');
+    Route::put('/notices/{id}', [NoticeController::class, 'update'])->name('notices.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/notices/{id}', [NoticeController::class, 'destroy'])->name('notices.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::post('/events', [NoticeController::class, 'storeEvent'])->name('events.store')->middleware('role:school_admin,super_admin');
-    Route::put('/events/{id}', [NoticeController::class, 'updateEvent'])->name('events.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/events/{id}', [NoticeController::class, 'destroyEvent'])->name('events.destroy')->middleware('role:school_admin,super_admin');
+    Route::post('/events', [NoticeController::class, 'storeEvent'])->name('events.store')->middleware('role:super_admin,school_admin');
+    Route::put('/events/{id}', [NoticeController::class, 'updateEvent'])->name('events.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/events/{id}', [NoticeController::class, 'destroyEvent'])->name('events.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::get('/homework', [HomeworkController::class, 'index'])->name('homework.index');
-    Route::post('/homework', [HomeworkController::class, 'store'])->name('homework.store')->middleware('role:school_admin,super_admin,teacher');
-    Route::put('/homework/{id}', [HomeworkController::class, 'update'])->name('homework.update')->middleware('role:school_admin,super_admin,teacher');
-    Route::delete('/homework/{id}', [HomeworkController::class, 'destroy'])->name('homework.destroy')->middleware('role:school_admin,super_admin,teacher');
+    Route::get('/homework', [HomeworkController::class, 'index'])->name('homework.index')->middleware('role:super_admin,school_admin,teacher,student,parent');
+    Route::post('/homework', [HomeworkController::class, 'store'])->name('homework.store')->middleware('role:super_admin,school_admin,teacher');
+    Route::put('/homework/{id}', [HomeworkController::class, 'update'])->name('homework.update')->middleware('role:super_admin,school_admin,teacher');
+    Route::delete('/homework/{id}', [HomeworkController::class, 'destroy'])->name('homework.destroy')->middleware('role:super_admin,school_admin,teacher');
 
     // Online Admissions (Admin Only)
-    Route::get('/admissions', [OnlineAdmissionAdminController::class, 'index'])->name('admissions.index')->middleware('role:school_admin,super_admin');
-    Route::put('/admissions/{id}/status', [OnlineAdmissionAdminController::class, 'updateStatus'])->name('admissions.update_status')->middleware('role:school_admin,super_admin');
-    Route::put('/admissions/{id}', [OnlineAdmissionAdminController::class, 'update'])->name('admissions.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/admissions/{id}', [OnlineAdmissionAdminController::class, 'destroy'])->name('admissions.destroy')->middleware('role:school_admin,super_admin');
-    Route::delete('/enquiries/{id}', [OnlineAdmissionAdminController::class, 'destroyEnquiry'])->name('enquiries.destroy')->middleware('role:school_admin,super_admin');
+    Route::get('/admissions', [OnlineAdmissionAdminController::class, 'index'])->name('admissions.index')->middleware('role:super_admin,school_admin');
+    Route::put('/admissions/{id}/status', [OnlineAdmissionAdminController::class, 'updateStatus'])->name('admissions.update_status')->middleware('role:super_admin,school_admin');
+    Route::put('/admissions/{id}', [OnlineAdmissionAdminController::class, 'update'])->name('admissions.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/admissions/{id}', [OnlineAdmissionAdminController::class, 'destroy'])->name('admissions.destroy')->middleware('role:super_admin,school_admin');
+    Route::delete('/enquiries/{id}', [OnlineAdmissionAdminController::class, 'destroyEnquiry'])->name('enquiries.destroy')->middleware('role:super_admin,school_admin');
 
-    // CMS & Settings (Admin Only)
-    Route::get('/cms', [CMSController::class, 'index'])->name('cms.index')->middleware('role:school_admin,super_admin');
-    Route::post('/cms/hero', [CMSController::class, 'updateHeroSettings'])->name('cms.hero.update')->middleware('role:school_admin,super_admin');
-    Route::post('/cms/news', [CMSController::class, 'storeNews'])->name('cms.news.store')->middleware('role:school_admin,super_admin');
-    Route::put('/cms/news/{id}', [CMSController::class, 'updateNews'])->name('cms.news.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/cms/news/{id}', [CMSController::class, 'destroyNews'])->name('cms.news.destroy')->middleware('role:school_admin,super_admin');
+    // CMS (Admin Only)
+    Route::get('/cms', [CMSController::class, 'index'])->name('cms.index')->middleware('role:super_admin,school_admin');
+    Route::post('/cms/hero', [CMSController::class, 'updateHeroSettings'])->name('cms.hero.update')->middleware('role:super_admin,school_admin');
+    Route::post('/cms/news', [CMSController::class, 'storeNews'])->name('cms.news.store')->middleware('role:super_admin,school_admin');
+    Route::put('/cms/news/{id}', [CMSController::class, 'updateNews'])->name('cms.news.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/cms/news/{id}', [CMSController::class, 'destroyNews'])->name('cms.news.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::post('/cms/testimonial', [CMSController::class, 'storeTestimonial'])->name('cms.testimonial.store')->middleware('role:school_admin,super_admin');
-    Route::put('/cms/testimonial/{id}', [CMSController::class, 'updateTestimonial'])->name('cms.testimonial.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/cms/testimonial/{id}', [CMSController::class, 'destroyTestimonial'])->name('cms.testimonial.destroy')->middleware('role:school_admin,super_admin');
+    Route::post('/cms/testimonial', [CMSController::class, 'storeTestimonial'])->name('cms.testimonial.store')->middleware('role:super_admin,school_admin');
+    Route::put('/cms/testimonial/{id}', [CMSController::class, 'updateTestimonial'])->name('cms.testimonial.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/cms/testimonial/{id}', [CMSController::class, 'destroyTestimonial'])->name('cms.testimonial.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::post('/cms/gallery', [CMSController::class, 'storeGallery'])->name('cms.gallery.store')->middleware('role:school_admin,super_admin');
-    Route::put('/cms/gallery/{id}', [CMSController::class, 'updateGallery'])->name('cms.gallery.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/cms/gallery/{id}', [CMSController::class, 'destroyGallery'])->name('cms.gallery.destroy')->middleware('role:school_admin,super_admin');
+    Route::post('/cms/gallery', [CMSController::class, 'storeGallery'])->name('cms.gallery.store')->middleware('role:super_admin,school_admin');
+    Route::put('/cms/gallery/{id}', [CMSController::class, 'updateGallery'])->name('cms.gallery.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/cms/gallery/{id}', [CMSController::class, 'destroyGallery'])->name('cms.gallery.destroy')->middleware('role:super_admin,school_admin');
 
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:school_admin,super_admin');
-    Route::post('/settings', [SettingController::class, 'updateSettings'])->name('settings.update')->middleware('role:school_admin,super_admin');
-    Route::post('/settings/roles', [SettingController::class, 'storeRole'])->name('settings.role.store')->middleware('role:school_admin,super_admin');
-    Route::put('/settings/roles/{id}', [SettingController::class, 'updateRole'])->name('settings.role.update')->middleware('role:school_admin,super_admin');
-    Route::delete('/settings/roles/{id}', [SettingController::class, 'destroyRole'])->name('settings.role.destroy')->middleware('role:school_admin,super_admin');
+    // System Settings & Roles (SUPER ADMIN ONLY)
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:super_admin');
+    Route::post('/settings', [SettingController::class, 'updateSettings'])->name('settings.update')->middleware('role:super_admin');
+    Route::post('/settings/roles', [SettingController::class, 'storeRole'])->name('settings.role.store')->middleware('role:super_admin');
+    Route::put('/settings/roles/{id}', [SettingController::class, 'updateRole'])->name('settings.role.update')->middleware('role:super_admin');
+    Route::delete('/settings/roles/{id}', [SettingController::class, 'destroyRole'])->name('settings.role.destroy')->middleware('role:super_admin');
 });

@@ -37,20 +37,33 @@ class DemoSchoolSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Create School
+        // 1. Create Primary School (Junior Gurukul School - ID 1)
         $school = School::create([
-            'name' => 'Green Valley International School',
-            'code' => 'GVIS001',
-            'domain' => 'greenvalley.edu',
+            'name' => 'Junior Gurukul School',
+            'code' => 'JGS001',
+            'domain' => 'juniorgurukulschool.in',
             'tagline' => 'Nurturing Future Global Leaders',
-            'phone' => '+91 98765 43210',
-            'email' => 'admin@greenvalley.edu',
-            'address' => 'Knowledge Park II, Greater Noida, Delhi NCR - 201310',
+            'phone' => '096176 14788',
+            'email' => 'info@juniorgurukulschool.in',
+            'address' => 'Junior Gurukul School, Seavri Dhaam, Kedwa Road, Bhikangaon, M.P.',
             'principal_name' => 'Dr. Rajesh Sharma, Ph.D.',
             'status' => 'active',
         ]);
 
-        // 2. Settings
+        // 2. Create Secondary School for Multi-Tenant Isolation Testing (Green Valley - ID 2)
+        $school2 = School::create([
+            'name' => 'Green Valley International School',
+            'code' => 'GVIS001',
+            'domain' => 'greenvalley.edu',
+            'tagline' => 'Excellence in Global Education',
+            'phone' => '+91 98765 43210',
+            'email' => 'admin@greenvalley.edu',
+            'address' => 'Knowledge Park II, Greater Noida, Delhi NCR - 201310',
+            'principal_name' => 'Dr. Suresh Mehta',
+            'status' => 'active',
+        ]);
+
+        // 3. Settings for Primary School
         $settings = [
             'school_name' => 'Junior Gurukul School',
             'school_tagline' => 'School · Bhikangaon, M.P.',
@@ -78,7 +91,7 @@ class DemoSchoolSeeder extends Seeder
             );
         }
 
-        // 3. Academic Year
+        // Academic Year
         $academicYear = AcademicYear::create([
             'school_id' => $school->id,
             'name' => '2026 - 2027',
@@ -88,7 +101,8 @@ class DemoSchoolSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // 4. Default Admin Users
+        // 4. Seed User Accounts for All System Roles
+        // Super Admin (Global - school_id: null)
         $superAdmin = User::create([
             'school_id' => null,
             'name' => 'Super Administrator',
@@ -99,13 +113,122 @@ class DemoSchoolSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        $admin = User::create([
+        // School Admin 1 (Junior Gurukul School)
+        $admin1 = User::create([
             'school_id' => $school->id,
-            'name' => 'Dr. Rajesh Sharma',
-            'email' => 'admin@greenvalley.edu',
+            'name' => 'School Admin (Junior Gurukul)',
+            'email' => 'admin@juniorgurukulschool.in',
             'role_name' => 'school_admin',
             'phone' => '+91 98765 43210',
             'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+        $admin = $admin1;
+
+        // School Admin 2 (Green Valley International School)
+        $admin2 = User::create([
+            'school_id' => $school2->id,
+            'name' => 'School Admin (Green Valley)',
+            'email' => 'admin@greenvalley.edu',
+            'role_name' => 'school_admin',
+            'phone' => '+91 98765 99999',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+
+        // Accountant
+        $accountant = User::create([
+            'school_id' => $school->id,
+            'name' => 'Ramesh Finance Officer',
+            'email' => 'accountant@juniorgurukulschool.in',
+            'role_name' => 'accountant',
+            'phone' => '+91 98222 11111',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+        Staff::create([
+            'school_id' => $school->id,
+            'user_id' => $accountant->id,
+            'employee_id' => 'EMP-FIN-01',
+            'name' => 'Ramesh Finance Officer',
+            'department' => 'Accounts & Finance',
+            'designation' => 'Head Accountant',
+            'phone' => $accountant->phone,
+            'email' => $accountant->email,
+            'joining_date' => '2021-04-01',
+            'basic_salary' => 45000,
+            'status' => 'active',
+        ]);
+
+        // Librarian
+        $librarian = User::create([
+            'school_id' => $school->id,
+            'name' => 'Suman Library Incharge',
+            'email' => 'librarian@juniorgurukulschool.in',
+            'role_name' => 'librarian',
+            'phone' => '+91 98222 22222',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+        Staff::create([
+            'school_id' => $school->id,
+            'user_id' => $librarian->id,
+            'employee_id' => 'EMP-LIB-01',
+            'name' => 'Suman Library Incharge',
+            'department' => 'Library Services',
+            'designation' => 'Chief Librarian',
+            'phone' => $librarian->phone,
+            'email' => $librarian->email,
+            'joining_date' => '2021-05-15',
+            'basic_salary' => 38000,
+            'status' => 'active',
+        ]);
+
+        // Transport Manager
+        $transportMgr = User::create([
+            'school_id' => $school->id,
+            'name' => 'Mahesh Transport Head',
+            'email' => 'transport@juniorgurukulschool.in',
+            'role_name' => 'transport_manager',
+            'phone' => '+91 98222 33333',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+        Staff::create([
+            'school_id' => $school->id,
+            'user_id' => $transportMgr->id,
+            'employee_id' => 'EMP-TRN-01',
+            'name' => 'Mahesh Transport Head',
+            'department' => 'Logistics & Transport',
+            'designation' => 'Transport Manager',
+            'phone' => $transportMgr->phone,
+            'email' => $transportMgr->email,
+            'joining_date' => '2022-01-10',
+            'basic_salary' => 40000,
+            'status' => 'active',
+        ]);
+
+        // HR Manager
+        $hrMgr = User::create([
+            'school_id' => $school->id,
+            'name' => 'Anita HR Officer',
+            'email' => 'hr@juniorgurukulschool.in',
+            'role_name' => 'hr_manager',
+            'phone' => '+91 98222 44444',
+            'password' => Hash::make('password123'),
+            'status' => 'active',
+        ]);
+        Staff::create([
+            'school_id' => $school->id,
+            'user_id' => $hrMgr->id,
+            'employee_id' => 'EMP-HR-01',
+            'name' => 'Anita HR Officer',
+            'department' => 'Human Resources',
+            'designation' => 'HR Manager',
+            'phone' => $hrMgr->phone,
+            'email' => $hrMgr->email,
+            'joining_date' => '2020-08-01',
+            'basic_salary' => 50000,
             'status' => 'active',
         ]);
 

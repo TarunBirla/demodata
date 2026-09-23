@@ -128,7 +128,28 @@ class StudentController extends Controller
 
     public function show($id)
     {
-        $student = Student::with(['schoolClass', 'section', 'academicYear', 'parents', 'attendances', 'fees.feeStructure', 'markEntries.examSubject.subject'])->findOrFail($id);
+        $user = auth()->user();
+        
+        $query = Student::with(['schoolClass', 'section', 'academicYear', 'parents', 'attendances', 'fees.feeStructure', 'markEntries.examSubject.subject']);
+        
+        if ($user->role_name !== 'super_admin') {
+            $query->where('school_id', $user->school_id);
+        }
+
+        $student = $query->findOrFail($id);
+
+        if ($user->role_name === 'student' && $student->user_id !== $user->id) {
+            return redirect()->route('admin.dashboard')->with('error', 'Access Restricted: You can only view your own student profile.');
+        }
+
+        if ($user->role_name === 'parent') {
+            $parentProfile = $user->parentProfile;
+            $parentStudentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
+            if (!in_array($student->id, $parentStudentIds) && $student->parent_id !== $user->id) {
+                return redirect()->route('admin.dashboard')->with('error', 'Access Restricted: You can only view profiles of your linked children.');
+            }
+        }
+
         return view('admin.students.show', compact('student'));
     }
 }

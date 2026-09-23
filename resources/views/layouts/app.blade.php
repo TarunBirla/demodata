@@ -166,10 +166,16 @@
 
         @php
             $userRole = auth()->user()->role_name ?? 'school_admin';
-            $isAdmin = in_array($userRole, ['super_admin', 'school_admin']);
+            $isSuperAdmin = $userRole === 'super_admin';
+            $isSchoolAdmin = $userRole === 'school_admin';
+            $isAdmin = $isSuperAdmin || $isSchoolAdmin;
             $isTeacher = $userRole === 'teacher';
             $isStudent = $userRole === 'student';
             $isParent = $userRole === 'parent';
+            $isAccountant = $userRole === 'accountant';
+            $isLibrarian = $userRole === 'librarian';
+            $isTransport = $userRole === 'transport_manager';
+            $isHr = $userRole === 'hr_manager';
         @endphp
 
         <div class="sidebar-menu">
@@ -179,47 +185,57 @@
 
             <div class="menu-header">Academics</div>
             <a href="{{ route('admin.students.index') }}" class="nav-link-custom {{ request()->routeIs('admin.students*') ? 'active' : '' }}">
-                <i class="bi bi-people"></i> {{ ($isStudent || $isParent) ? 'My Profile & Directory' : 'Students' }}
+                <i class="bi bi-people"></i> {{ ($isStudent || $isParent) ? 'My Profile & Directory' : 'Students Directory' }}
             </a>
-            @if($isAdmin)
+            @if($isAdmin || $isHr)
             <a href="{{ route('admin.teachers.index') }}" class="nav-link-custom {{ request()->routeIs('admin.teachers*') ? 'active' : '' }}">
-                <i class="bi bi-person-badge"></i> Teachers
+                <i class="bi bi-person-badge"></i> Teachers & Staff
             </a>
             @endif
+            @if($isAdmin || $isTeacher)
             <a href="{{ route('admin.classes.index') }}" class="nav-link-custom {{ request()->routeIs('admin.classes*') ? 'active' : '' }}">
                 <i class="bi bi-building"></i> Classes & Sections
             </a>
             <a href="{{ route('admin.subjects.index') }}" class="nav-link-custom {{ request()->routeIs('admin.subjects*') ? 'active' : '' }}">
                 <i class="bi bi-book"></i> Subjects
             </a>
+            @endif
+            @if($isAdmin || $isTeacher || $isStudent || $isParent)
             <a href="{{ route('admin.timetable.index') }}" class="nav-link-custom {{ request()->routeIs('admin.timetable*') ? 'active' : '' }}">
                 <i class="bi bi-calendar3"></i> Timetable
             </a>
+            @endif
 
+            @if($isAdmin || $isTeacher || $isStudent || $isParent)
             <div class="menu-header">Attendance</div>
             <a href="{{ route('admin.attendance.index') }}" class="nav-link-custom {{ request()->routeIs('admin.attendance*') ? 'active' : '' }}">
                 <i class="bi bi-check2-square"></i> {{ ($isAdmin || $isTeacher) ? 'Mark Attendance' : 'Attendance Records' }}
             </a>
+            @endif
 
-            @if($isAdmin || $isStudent || $isParent)
+            @if($isAdmin || $isAccountant || $isStudent || $isParent)
             <div class="menu-header">Finance & Fees</div>
             <a href="{{ route('admin.fees.index') }}" class="nav-link-custom {{ request()->routeIs('admin.fees*') ? 'active' : '' }}">
-                <i class="bi bi-cash-stack"></i> {{ $isAdmin ? 'Fee Management' : 'Fee Dues & Receipts' }}
+                <i class="bi bi-cash-stack"></i> {{ ($isAdmin || $isAccountant) ? 'Fee Management' : 'Fee Dues & Receipts' }}
             </a>
             @endif
 
+            @if($isAdmin || $isTeacher || $isStudent || $isParent)
             <div class="menu-header">Examinations</div>
             <a href="{{ route('admin.exams.index') }}" class="nav-link-custom {{ request()->routeIs('admin.exams*') ? 'active' : '' }}">
                 <i class="bi bi-journal-check"></i> Exams & Marks
             </a>
+            @endif
 
             <div class="menu-header">Communication</div>
             <a href="{{ route('admin.notices.index') }}" class="nav-link-custom {{ request()->routeIs('admin.notices*') ? 'active' : '' }}">
                 <i class="bi bi-megaphone"></i> Notices & Events
             </a>
+            @if($isAdmin || $isTeacher || $isStudent || $isParent)
             <a href="{{ route('admin.homework.index') }}" class="nav-link-custom {{ request()->routeIs('admin.homework*') ? 'active' : '' }}">
                 <i class="bi bi-file-earmark-text"></i> Homework
             </a>
+            @endif
 
             @if($isAdmin)
             <div class="menu-header">Admissions & CMS</div>
@@ -229,7 +245,9 @@
             <a href="{{ route('admin.cms.index') }}" class="nav-link-custom {{ request()->routeIs('admin.cms*') ? 'active' : '' }}">
                 <i class="bi bi-globe"></i> Website CMS
             </a>
+            @endif
 
+            @if($isSuperAdmin)
             <div class="menu-header">System</div>
             <a href="{{ route('admin.settings.index') }}" class="nav-link-custom {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
                 <i class="bi bi-gear"></i> Settings & Roles
