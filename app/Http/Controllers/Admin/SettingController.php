@@ -138,7 +138,7 @@ class SettingController extends Controller
             'phone' => 'nullable|string',
         ]);
 
-        User::create([
+        $user = User::create([
             'school_id' => $validated['school_id'] ?? auth()->user()->school_id ?? 1,
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -147,6 +147,56 @@ class SettingController extends Controller
             'phone' => $validated['phone'],
             'status' => 'active',
         ]);
+
+        $nameParts = explode(' ', $validated['name'], 2);
+        $firstName = $nameParts[0];
+        $lastName = $nameParts[1] ?? '';
+
+        if ($validated['role_name'] === 'teacher') {
+            \App\Models\Teacher::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'school_id' => $user->school_id,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'designation' => 'Faculty Member',
+                    'status' => 'active',
+                ]
+            );
+        } elseif ($validated['role_name'] === 'student') {
+            $admissionNo = 'JGS-' . date('Y') . '-' . rand(1000, 9999);
+            $defaultClass = \App\Models\SchoolClass::where('school_id', $user->school_id)->first();
+            $defaultSec = \App\Models\Section::where('school_id', $user->school_id)->first();
+            \App\Models\Student::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'school_id' => $user->school_id,
+                    'first_name' => $firstName,
+                    'last_name' => $lastName,
+                    'admission_number' => $admissionNo,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'gender' => 'Male',
+                    'dob' => '2015-01-01',
+                    'class_id' => $defaultClass->id ?? 1,
+                    'section_id' => $defaultSec->id ?? 1,
+                    'status' => 'active',
+                ]
+            );
+        } elseif ($validated['role_name'] === 'parent') {
+            \App\Models\ParentObject::firstOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'school_id' => $user->school_id,
+                    'father_name' => $validated['name'],
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'status' => 'active',
+                ]
+            );
+        }
 
         return redirect()->route('admin.settings.index')->with('success', 'User account for ' . ucfirst(str_replace('_', ' ', $validated['role_name'])) . ' created successfully! Email: ' . $validated['email']);
     }

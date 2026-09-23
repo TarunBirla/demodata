@@ -27,15 +27,23 @@ class ExamController extends Controller
         $exams = $examsQuery->get();
 
         if ($user->role_name === 'teacher') {
-            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
-            $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
-            $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
-            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
-            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
-            $secClassIds = Section::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $teacherObj = $user->teacher ?? \App\Models\Teacher::where('user_id', $user->id)->first();
+            $teacherId = $teacherObj?->id;
+            $teacherIds = $teacherId ? [$teacherId] : [];
 
-            $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
-            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+            if (!empty($teacherIds)) {
+                $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+                $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+                $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+                $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+                $secClassIds = Section::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+
+                $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
+                $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+            } else {
+                $allAssignedSubjectIds = [];
+                $allAssignedClassIds = [];
+            }
 
             if (empty($allAssignedClassIds) && empty($allAssignedSubjectIds)) {
                 $classes = collect();

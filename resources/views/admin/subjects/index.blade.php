@@ -7,9 +7,11 @@
 <x-breadcrumb :items="['Subjects' => route('admin.subjects.index')]" />
 
 <x-page-header title="Subject Configuration" subtitle="Manage academic subject catalog, codes, theory/practical classification.">
-    <x-slot:actions>
-        <button class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#addSubjectModal"><i class="bi bi-plus-lg me-1"></i> Add New Subject</button>
-    </x-slot:actions>
+    @if(in_array(auth()->user()->role_name, ['super_admin', 'school_admin']))
+        <x-slot:actions>
+            <button class="btn btn-navy" data-bs-toggle="modal" data-bs-target="#addSubjectModal"><i class="bi bi-plus-lg me-1"></i> Add New Subject</button>
+        </x-slot:actions>
+    @endif
 </x-page-header>
 
 <x-card>
@@ -21,14 +23,18 @@
                 <td><x-badge variant="info">{{ strtoupper($sub->type) }}</x-badge></td>
                 <td><x-badge variant="success">{{ strtoupper($sub->status) }}</x-badge></td>
                 <td>
-                    <div class="d-flex gap-1">
-                        <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editSubjectModal{{ $sub->id }}"><i class="bi bi-pencil"></i></button>
-                        <form action="{{ route('admin.subjects.destroy', $sub->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete subject {{ $sub->name }}?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
-                        </form>
-                    </div>
+                    @if(in_array(auth()->user()->role_name, ['super_admin', 'school_admin']))
+                        <div class="d-flex gap-1">
+                            <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editSubjectModal{{ $sub->id }}"><i class="bi bi-pencil"></i></button>
+                            <form action="{{ route('admin.subjects.destroy', $sub->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete subject {{ $sub->name }}?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    @else
+                        <span class="text-muted small"><i class="bi bi-lock"></i> Read Only</span>
+                    @endif
 
                     <!-- EDIT SUBJECT MODAL -->
                     <x-modal id="editSubjectModal{{ $sub->id }}" title="Edit Subject — {{ $sub->name }}">

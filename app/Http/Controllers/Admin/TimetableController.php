@@ -30,8 +30,13 @@ class TimetableController extends Controller
         }
 
         if ($user->role_name === 'teacher') {
-            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
-            $query->whereIn('teacher_id', $teacherIds);
+            $teacherObj = $user->teacher ?? \App\Models\Teacher::where('user_id', $user->id)->first();
+            $teacherId = $teacherObj?->id;
+            if ($teacherId) {
+                $query->where('teacher_id', $teacherId);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         } elseif ($user->role_name === 'student') {
             $student = $user->student;
             if ($student && $student->class_id && $student->section_id) {

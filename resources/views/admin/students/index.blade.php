@@ -7,9 +7,11 @@
 <x-breadcrumb :items="['Students' => route('admin.students.index')]" />
 
 <x-page-header title="Student Management" subtitle="Manage student profiles, class section assignments, and academic records.">
-    <x-slot:actions>
-        <x-button variant="navy" icon="bi-plus-lg" data-bs-toggle="modal" data-bs-target="#addStudentModal">Add New Student</x-button>
-    </x-slot:actions>
+    @if(in_array(auth()->user()->role_name, ['super_admin', 'school_admin']))
+        <x-slot:actions>
+            <x-button variant="navy" icon="bi-plus-lg" data-bs-toggle="modal" data-bs-target="#addStudentModal">Add New Student</x-button>
+        </x-slot:actions>
+    @endif
 </x-page-header>
 
 <x-card>

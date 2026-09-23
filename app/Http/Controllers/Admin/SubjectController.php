@@ -14,11 +14,17 @@ class SubjectController extends Controller
         $schoolId = $user->school_id ?? 1;
 
         if ($user->role_name === 'teacher') {
-            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
-            $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
-            $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+            $teacherObj = $user->teacher ?? \App\Models\Teacher::where('user_id', $user->id)->first();
+            $teacherId = $teacherObj?->id;
+            $teacherIds = $teacherId ? [$teacherId] : [];
 
-            $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
+            if (!empty($teacherIds)) {
+                $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+                $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+                $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
+            } else {
+                $allAssignedSubjectIds = [];
+            }
 
             if (empty($allAssignedSubjectIds)) {
                 $subjects = collect();

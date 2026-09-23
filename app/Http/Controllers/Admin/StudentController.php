@@ -24,15 +24,23 @@ class StudentController extends Controller
         }
 
         if ($user->role_name === 'teacher') {
-            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
-            $assignedSecIds = Section::whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
-            $ttSecIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('section_id')->toArray();
-            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
-            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
-            $secClassIds = Section::whereIn('id', array_merge($assignedSecIds, $ttSecIds))->pluck('class_id')->toArray();
+            $teacherObj = $user->teacher ?? \App\Models\Teacher::where('user_id', $user->id)->first();
+            $teacherId = $teacherObj?->id;
+            $teacherIds = $teacherId ? [$teacherId] : [];
 
-            $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
-            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+            if (!empty($teacherIds)) {
+                $assignedSecIds = Section::whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
+                $ttSecIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('section_id')->toArray();
+                $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+                $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+                $secClassIds = Section::whereIn('id', array_merge($assignedSecIds, $ttSecIds))->pluck('class_id')->toArray();
+
+                $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
+                $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+            } else {
+                $allAssignedSecIds = [];
+                $allAssignedClassIds = [];
+            }
 
             if (!empty($allAssignedClassIds) || !empty($allAssignedSecIds)) {
                 $query->where(function($q) use ($allAssignedClassIds, $allAssignedSecIds) {

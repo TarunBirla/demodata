@@ -10,6 +10,10 @@
     $isTeacher = $userRole === 'teacher';
     $isStudent = $userRole === 'student';
     $isParent = $userRole === 'parent';
+    $isAccountant = $userRole === 'accountant';
+    $isLibrarian = $userRole === 'librarian';
+    $isTransport = $userRole === 'transport_manager';
+    $isHr = $userRole === 'hr_manager';
 @endphp
 
 <x-page-header :title="$roleContext['title'] ?? 'Executive Dashboard'" :subtitle="$roleContext['subtitle'] ?? 'Welcome to Junior Gurukul School Management Panel'">
@@ -75,16 +79,27 @@
         @elseif($isParent)
             <x-card title="Children Overview" headerIcon="bi-people">
                 <div class="py-1">
-                    <div class="h3 fw-bold text-navy mb-0">{{ $roleContext['childrenCount'] ?? 1 }}</div>
+                    <div class="h3 fw-bold text-navy mb-0">{{ count($roleContext['children'] ?? []) }}</div>
                     <div class="text-muted small">Linked Student(s)</div>
                 </div>
                 <div class="d-flex flex-column gap-1 mt-2">
                     @foreach($roleContext['children'] ?? [] as $child)
                         <div class="d-flex justify-content-between p-2 bg-light rounded small">
                             <span class="fw-semibold text-dark">{{ $child->full_name }}</span>
-                            <span class="badge bg-soft-primary text-primary">{{ $child->schoolClass->name ?? 'Grade 6' }}</span>
+                            <span class="badge bg-soft-primary text-primary">{{ $child->schoolClass->name ?? 'Grade' }}</span>
                         </div>
                     @endforeach
+                </div>
+            </x-card>
+        @elseif($isTeacher)
+            <x-card title="My Faculty Profile" headerIcon="bi-person-badge">
+                <div class="py-1">
+                    <h6 class="fw-bold text-dark mb-0">{{ $roleContext['teacher']->full_name ?? auth()->user()->name }}</h6>
+                    <span class="small text-muted">{{ $roleContext['teacher']->designation ?? 'Faculty Member' }}</span>
+                </div>
+                <div class="d-flex justify-content-between p-2 bg-light rounded mt-2 small">
+                    <span class="text-muted">Assigned Sections:</span>
+                    <span class="fw-bold text-primary">{{ count($roleContext['mySections'] ?? []) }}</span>
                 </div>
             </x-card>
         @else
@@ -125,7 +140,22 @@
                     <span class="fw-bold text-success">₹ 0.00 (PAID)</span>
                 </div>
             </x-card>
-        @else
+        @elseif($isTeacher)
+            <x-card title="My Teaching Summary" headerIcon="bi-journal-bookmark-fill">
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-muted">Assigned Classes:</span>
+                    <span class="fw-bold text-dark">{{ count($roleContext['mySections'] ?? []) }}</span>
+                </div>
+                <div class="d-flex justify-content-between py-1 small">
+                    <span class="text-muted">Active Homework:</span>
+                    <span class="fw-bold text-primary">{{ count($roleContext['myHomework'] ?? []) }}</span>
+                </div>
+                <div class="d-flex justify-content-between py-1 small border-top pt-2">
+                    <span class="text-muted">Status:</span>
+                    <span class="fw-bold text-success">ACTIVE FACULTY</span>
+                </div>
+            </x-card>
+        @elseif($isAdmin || $isAccountant)
             <x-card title="Finance Summary" headerIcon="bi-bank">
                 <div class="d-flex justify-content-between py-1 small">
                     <span class="text-muted">Academic Balance:</span>
@@ -140,12 +170,19 @@
                     <span class="fw-bold text-danger">₹ {{ number_format($totalFeePending, 2) }}</span>
                 </div>
             </x-card>
+        @else
+            <x-card title="Portal Overview" headerIcon="bi-shield-check">
+                <div class="py-2 text-center">
+                    <span class="badge bg-navy px-3 py-2 fs-6">{{ strtoupper(str_replace('_', ' ', $userRole)) }}</span>
+                    <div class="small text-muted mt-2">Active School Management Portal Session</div>
+                </div>
+            </x-card>
         @endif
     </div>
 </div>
 
-<!-- CASHFLOW ANALYSIS & FEE REPORT ROW (Admin only or summary view) -->
-@if($isAdmin)
+<!-- CASHFLOW ANALYSIS & FEE REPORT ROW (Admin & Accountant only) -->
+@if($isAdmin || $isAccountant)
 <div class="row g-3 mb-4">
     <div class="col-lg-8">
         <x-card title="Cashflow Analysis (Incomes vs Expenses)" headerIcon="bi-graph-up-arrow">
@@ -188,7 +225,8 @@
 </div>
 @endif
 
-<!-- STUDENT STATISTICS & TODAY'S ATTENDANCE OVERVIEW ROW -->
+<!-- STUDENT STATISTICS & TODAY'S ATTENDANCE OVERVIEW ROW (Admin, Accountant & HR only) -->
+@if($isAdmin || $isAccountant || $isHr)
 <div class="row g-3 mb-4">
     <div class="col-12">
         <x-card title="Student Statistics & Today's Attendance Overview" headerIcon="bi-people-fill">
@@ -246,113 +284,119 @@
         </x-card>
     </div>
 </div>
+@endif
 
 <!-- RECENT ACTIVITY & UPCOMING EVENTS ROW -->
 <div class="row g-3">
     <div class="col-lg-7">
-        <x-card title="Recent Activity & Transactions" headerIcon="bi-activity">
-            <x-table :headers="['Receipt #', 'Student', 'Amount', 'Date', 'Mode']">
-                @forelse($recentPayments as $payment)
-                    <tr>
-                        <td class="fw-semibold text-primary">{{ $payment->receipt_number }}</td>
-                        <td>{{ $payment->student->full_name ?? 'Student' }}</td>
-                        <td class="fw-bold text-success">₹ {{ number_format($payment->amount, 2) }}</td>
-                        <td class="small text-muted">{{ $payment->payment_date ? $payment->payment_date->format('M d, Y') : 'Sep 15, 2026' }}</td>
-                        <td><x-badge variant="info">{{ strtoupper($payment->payment_mode ?? 'CASH') }}</x-badge></td>
-                    </tr>
-                @empty
-                    <tr><td colspan="5" class="text-center text-muted py-3">No payments recorded yet.</td></tr>
-                @endforelse
-            </x-table>
-        </x-card>
+        @if($isAdmin || $isAccountant)
+            <x-card title="Recent Activity & Fee Transactions" headerIcon="bi-activity">
+                <x-table :headers="['Receipt #', 'Student', 'Amount', 'Date', 'Mode']">
+                    @forelse($recentPayments as $payment)
+                        <tr>
+                            <td class="fw-semibold text-primary">{{ $payment->receipt_number }}</td>
+                            <td>{{ $payment->student->full_name ?? 'Student' }}</td>
+                            <td class="fw-bold text-success">₹ {{ number_format($payment->amount, 2) }}</td>
+                            <td class="small text-muted">{{ $payment->payment_date ? $payment->payment_date->format('M d, Y') : 'Sep 15, 2026' }}</td>
+                            <td><x-badge variant="info">{{ strtoupper($payment->payment_mode ?? 'CASH') }}</x-badge></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5" class="text-center text-muted py-3">No payments recorded yet.</td></tr>
+                    @endforelse
+                </x-table>
+            </x-card>
+        @elseif($isTeacher)
+            <x-card title="My Assigned Class Sections" headerIcon="bi-building">
+                <x-table :headers="['Class Name', 'Section', 'Assigned Role', 'Actions']">
+                    @forelse($roleContext['mySections'] ?? [] as $sec)
+                        <tr>
+                            <td class="fw-bold text-dark">{{ $sec->schoolClass->name ?? 'Class' }}</td>
+                            <td><x-badge variant="navy">{{ $sec->name }}</x-badge></td>
+                            <td><span class="badge bg-success">Class Teacher</span></td>
+                            <td>
+                                <a href="{{ route('admin.attendance.index', ['class_id' => $sec->class_id, 'section_id' => $sec->id]) }}" class="btn btn-sm btn-navy"><i class="bi bi-check2-square"></i> Mark Attendance</a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="4" class="text-center text-muted py-3"><i class="bi bi-info-circle me-1"></i> No classes or sections assigned to your teacher profile yet.</td></tr>
+                    @endforelse
+                </x-table>
+            </x-card>
+        @else
+            <x-card title="Noticeboard & School Communications" headerIcon="bi-megaphone">
+                <div class="list-group list-group-flush">
+                    @forelse($recentNotices as $notice)
+                        <div class="list-group-item px-0 py-2">
+                            <div class="fw-bold text-dark">{{ $notice->title }}</div>
+                            <div class="small text-muted">{{ Str::limit($notice->content, 90) }}</div>
+                        </div>
+                    @empty
+                        <div class="text-muted small text-center py-2">No active notices published yet.</div>
+                    @endforelse
+                </div>
+            </x-card>
+        @endif
     </div>
 
     <div class="col-lg-5">
-        <x-card title="Upcoming Holidays & Events" headerIcon="bi-calendar-event">
-            <div class="d-flex flex-column gap-3">
+        <x-card title="Upcoming Events & Calendar" headerIcon="bi-calendar-event">
+            <div class="list-group list-group-flush">
                 @forelse($upcomingEvents as $ev)
-                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
-                        <div class="bg-navy text-white rounded text-center px-3 py-2">
-                            <div class="fw-bold fs-5 leading-none">{{ $ev->event_date ? $ev->event_date->format('d') : '10' }}</div>
-                            <div class="small text-uppercase" style="font-size: 0.65rem;">{{ $ev->event_date ? $ev->event_date->format('M') : 'OCT' }}</div>
-                        </div>
+                    <div class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="fw-bold text-dark mb-0">{{ $ev->title }}</h6>
-                            <span class="small text-muted"><i class="bi bi-geo-alt"></i> {{ $ev->location ?? 'Main Campus' }}</span>
+                            <div class="fw-bold text-dark small">{{ $ev->title }}</div>
+                            <div class="text-muted extra-small">{{ \Carbon\Carbon::parse($ev->event_date)->format('M d, Y') }}</div>
                         </div>
+                        <x-badge variant="primary">{{ strtoupper($ev->category ?? 'ACADEMIC') }}</x-badge>
                     </div>
                 @empty
-                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
-                        <div class="bg-navy text-white rounded text-center px-3 py-2">
-                            <div class="fw-bold fs-5 leading-none">10</div>
-                            <div class="small text-uppercase" style="font-size: 0.65rem;">OCT</div>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold text-dark mb-0">Annual Sports Meet 2026</h6>
-                            <span class="small text-muted"><i class="bi bi-geo-alt"></i> Main Sports Ground</span>
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3">
-                        <div class="bg-navy text-white rounded text-center px-3 py-2">
-                            <div class="fw-bold fs-5 leading-none">28</div>
-                            <div class="small text-uppercase" style="font-size: 0.65rem;">SEP</div>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold text-dark mb-0">Term 1 Parent Teacher Meeting</h6>
-                            <span class="small text-muted"><i class="bi bi-building"></i> Main Auditorium</span>
-                        </div>
-                    </div>
+                    <div class="text-muted small text-center py-2">No upcoming events scheduled.</div>
                 @endforelse
             </div>
         </x-card>
     </div>
 </div>
 
-@endsection
-
-@push('scripts')
 @if($isAdmin)
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const chartEl = document.getElementById('cashflowChart');
-        if (chartEl) {
-            const ctx = chartEl.getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Sep 2025', 'Oct 2025', 'Nov 2025', 'Dec 2025', 'Jan 2026', 'Feb 2026'],
-                    datasets: [
-                        {
-                            label: 'Incomes (₹)',
-                            data: [220000, 200000, 165000, 210000, 205000, 185000],
-                            borderColor: '#047857',
-                            backgroundColor: 'rgba(4, 120, 87, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Expenses (₹)',
-                            data: [100000, 90000, 85000, 92000, 80000, 95000],
-                            borderColor: '#B91C1C',
-                            backgroundColor: 'rgba(185, 28, 28, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' }
+document.addEventListener("DOMContentLoaded", function() {
+    const ctx = document.getElementById('cashflowChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                datasets: [
+                    {
+                        label: 'Fee Collections (₹)',
+                        data: [120000, 150000, 180000, 140000, 210000, 130000],
+                        borderColor: '#2B6CB0',
+                        backgroundColor: 'rgba(43, 108, 176, 0.1)',
+                        fill: true,
+                        tension: 0.3
                     },
-                    scales: {
-                        y: { beginAtZero: true }
+                    {
+                        label: 'Operational Expenses (₹)',
+                        data: [90000, 95000, 110000, 100000, 105000, 98000],
+                        borderColor: '#E53E3E',
+                        backgroundColor: 'rgba(229, 62, 62, 0.05)',
+                        fill: true,
+                        tension: 0.3
                     }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' }
                 }
-            });
-        }
-    });
+            }
+        });
+    }
+});
 </script>
 @endif
-@endpush
+
+@endsection
