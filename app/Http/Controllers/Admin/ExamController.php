@@ -17,11 +17,40 @@ class ExamController extends Controller
 {
     public function index()
     {
-        $schoolId = auth()->user()->school_id ?? 1;
-        $exams = Exam::with(['examSubjects.subject', 'examSubjects.schoolClass'])->where('school_id', $schoolId)->latest()->get();
-        $classes = SchoolClass::where('school_id', $schoolId)->get();
-        $subjects = Subject::where('school_id', $schoolId)->get();
-        $students = Student::where('school_id', $schoolId)->get();
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
+
+        $examsQuery = Exam::with(['examSubjects.subject', 'examSubjects.schoolClass', 'school'])->latest();
+        if ($user->role_name !== 'super_admin') {
+            $examsQuery->where('school_id', $schoolId);
+        }
+        $exams = $examsQuery->get();
+
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+            $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $secClassIds = Section::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+
+            $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
+            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+
+            if (empty($allAssignedClassIds) && empty($allAssignedSubjectIds)) {
+                $classes = collect();
+                $subjects = collect();
+                $students = collect();
+            } else {
+                $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
+                $subjects = Subject::where('school_id', $schoolId)->whereIn('id', $allAssignedSubjectIds)->get();
+                $students = Student::where('school_id', $schoolId)->whereIn('class_id', $allAssignedClassIds)->get();
+            }
+        } else {
+            $classes = $user->role_name === 'super_admin' ? SchoolClass::all() : SchoolClass::where('school_id', $schoolId)->get();
+            $subjects = $user->role_name === 'super_admin' ? Subject::all() : Subject::where('school_id', $schoolId)->get();
+            $students = $user->role_name === 'super_admin' ? Student::all() : Student::where('school_id', $schoolId)->get();
+        }
 
         return view('admin.exams.index', compact('exams', 'classes', 'subjects', 'students'));
     }
@@ -92,6 +121,23 @@ class ExamController extends Controller
             'marks_obtained' => 'required|numeric|min:0|max:100',
             'max_marks' => 'required|numeric|min:1',
         ]);
+
+        $user = auth()->user();
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+            $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $secClassIds = Section::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+
+            $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
+            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+
+            if (!in_array($validated['class_id'], $allAssignedClassIds) && !in_array($validated['subject_id'], $allAssignedSubjectIds)) {
+                return redirect()->route('admin.exams.index')->with('error', 'Access Restricted: You are not authorized to enter marks for unassigned classes or subjects.');
+            }
+        }
 
         $examSubject = ExamSubject::firstOrCreate(
             [

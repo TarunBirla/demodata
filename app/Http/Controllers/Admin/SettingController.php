@@ -8,23 +8,63 @@ use App\Models\School;
 use App\Models\SchoolSetting;
 use App\Models\Role;
 use App\Models\Permission;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class SettingController extends Controller
 {
     public function index()
     {
         $schoolId = auth()->user()->school_id ?? 1;
-        $school = School::with('settings')->find($schoolId);
+        $schools = School::withCount(['users', 'students'])->get();
+        $school = School::with('settings')->find($schoolId) ?? $schools->first();
         $roles = Role::with('permissions')->get();
         $permissions = Permission::all()->groupBy('group');
-        $users = \App\Models\User::where('school_id', $schoolId)->orWhereNull('school_id')->latest()->get();
+        $users = User::with('school')->latest()->get();
 
-        return view('admin.settings.index', compact('school', 'roles', 'permissions', 'users'));
+        return view('admin.settings.index', compact('schools', 'school', 'roles', 'permissions', 'users'));
+    }
+
+    public function storeSchool(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:schools,code',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $school = School::create([
+            'name' => $validated['name'],
+            'code' => $validated['code'],
+            'phone' => $validated['phone'],
+            'email' => $validated['email'],
+            'address' => $validated['address'],
+            'status' => 'active',
+        ]);
+
+        return redirect()->route('admin.settings.index')->with('success', 'New School "' . $school->name . '" created successfully!');
+    }
+
+    public function updateSchool(Request $request, $id)
+    {
+        $school = School::findOrFail($id);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $school->update($validated);
+
+        return redirect()->route('admin.settings.index')->with('success', 'School profile for ' . $school->name . ' updated successfully!');
     }
 
     public function updateSettings(Request $request)
     {
-        $schoolId = auth()->user()->school_id ?? 1;
+        $schoolId = $request->school_id ?? auth()->user()->school_id ?? 1;
         $school = School::find($schoolId);
 
         if ($school) {
@@ -89,26 +129,70 @@ class SettingController extends Controller
 
     public function storeUserAccount(Request $request)
     {
-        $schoolId = auth()->user()->school_id ?? 1;
-
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'role_name' => 'required|string',
+            'school_id' => 'nullable|exists:schools,id',
             'password' => 'required|string|min:6',
             'phone' => 'nullable|string',
         ]);
 
-        \App\Models\User::create([
-            'school_id' => $schoolId,
+        User::create([
+            'school_id' => $validated['school_id'] ?? auth()->user()->school_id ?? 1,
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role_name' => $validated['role_name'],
-            'password' => \Illuminate\Support\Facades\Hash::make($validated['password']),
+            'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'],
             'status' => 'active',
         ]);
 
-        return redirect()->route('admin.settings.index')->with('success', 'User account for ' . ucfirst(str_replace('_', ' ', $validated['role_name'])) . ' created successfully! They can now log in with email: ' . $validated['email']);
+        return redirect()->route('admin.settings.index')->with('success', 'User account for ' . ucfirst(str_replace('_', ' ', $validated['role_name'])) . ' created successfully! Email: ' . $validated['email']);
+    }
+
+    public function updateUserAccount(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $id,
+            'role_name' => 'required|string',
+            'school_id' => 'nullable|exists:schools,id',
+            'password' => 'nullable|string|min:6',
+            'phone' => 'nullable|string',
+            'status' => 'required|string|in:active,inactive',
+        ]);
+
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role_name' => $validated['role_name'],
+            'school_id' => $validated['school_id'] ?? null,
+            'phone' => $validated['phone'],
+            'status' => $validated['status'],
+        ];
+
+        if (!empty($validated['password'])) {
+            $data['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.settings.index')->with('success', 'User account for ' . $user->name . ' updated successfully!');
+    }
+
+    public function destroyUserAccount($id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return redirect()->route('admin.settings.index')->with('error', 'You cannot delete your own active Super Admin account!');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.settings.index')->with('success', 'User account deleted successfully.');
     }
 }

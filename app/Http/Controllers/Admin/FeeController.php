@@ -19,8 +19,13 @@ class FeeController extends Controller
         $user = auth()->user();
         $schoolId = $user->school_id ?? 1;
 
-        $paymentsQuery = FeePayment::with('student')->where('school_id', $schoolId);
-        $expectedQuery = StudentFee::where('school_id', $schoolId);
+        $paymentsQuery = FeePayment::with(['student', 'school']);
+        $expectedQuery = StudentFee::query();
+
+        if ($user->role_name !== 'super_admin') {
+            $paymentsQuery->where('school_id', $schoolId);
+            $expectedQuery->where('school_id', $schoolId);
+        }
 
         if ($user->role_name === 'student') {
             $student = $user->student;
@@ -41,9 +46,13 @@ class FeeController extends Controller
         $totalPending = max(0, $totalExpected - $totalCollected);
 
         $recentPayments = $paymentsQuery->latest()->paginate(15);
-        $students = Student::where('school_id', $schoolId)->get();
-        $classes = SchoolClass::where('school_id', $schoolId)->get();
-        $feeStructures = FeeStructure::with('schoolClass')->where('school_id', $schoolId)->get();
+        $students = $user->role_name === 'super_admin' ? Student::all() : Student::where('school_id', $schoolId)->get();
+        $classes = $user->role_name === 'super_admin' ? SchoolClass::all() : SchoolClass::where('school_id', $schoolId)->get();
+        $feeStructuresQuery = FeeStructure::with(['schoolClass', 'school']);
+        if ($user->role_name !== 'super_admin') {
+            $feeStructuresQuery->where('school_id', $schoolId);
+        }
+        $feeStructures = $feeStructuresQuery->get();
 
         return view('admin.fees.index', compact('totalCollected', 'totalExpected', 'totalPending', 'recentPayments', 'students', 'classes', 'feeStructures'));
     }

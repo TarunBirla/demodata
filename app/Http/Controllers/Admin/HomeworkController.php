@@ -19,7 +19,10 @@ class HomeworkController extends Controller
         $user = auth()->user();
         $schoolId = $user->school_id ?? 1;
 
-        $query = Homework::with(['schoolClass', 'section', 'subject', 'teacher'])->where('school_id', $schoolId);
+        $query = Homework::with(['schoolClass', 'section', 'subject', 'teacher', 'school']);
+        if ($user->role_name !== 'super_admin') {
+            $query->where('school_id', $schoolId);
+        }
 
         if ($user->role_name === 'teacher') {
             $teacherIds = array_filter([$user->id, $user->teacher?->id]);
@@ -53,10 +56,10 @@ class HomeworkController extends Controller
         }
 
         $homeworkList = $query->latest()->get();
-        $classes = SchoolClass::where('school_id', $schoolId)->get();
-        $sections = Section::where('school_id', $schoolId)->get();
-        $subjects = Subject::where('school_id', $schoolId)->get();
-        $teachers = Teacher::where('school_id', $schoolId)->get();
+        $classes = $user->role_name === 'super_admin' ? SchoolClass::all() : SchoolClass::where('school_id', $schoolId)->get();
+        $sections = $user->role_name === 'super_admin' ? Section::all() : Section::where('school_id', $schoolId)->get();
+        $subjects = $user->role_name === 'super_admin' ? Subject::all() : Subject::where('school_id', $schoolId)->get();
+        $teachers = $user->role_name === 'super_admin' ? Teacher::all() : Teacher::where('school_id', $schoolId)->get();
 
         return view('admin.homework.index', compact('homeworkList', 'classes', 'sections', 'subjects', 'teachers'));
     }

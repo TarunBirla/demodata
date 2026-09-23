@@ -10,8 +10,13 @@ class TeacherController extends Controller
 {
     public function index()
     {
-        $schoolId = auth()->user()->school_id ?? 1;
-        $teachers = Teacher::where('school_id', $schoolId)->latest()->paginate(15);
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
+        $query = Teacher::with('school')->latest();
+        if ($user->role_name !== 'super_admin') {
+            $query->where('school_id', $schoolId);
+        }
+        $teachers = $query->paginate(15);
         return view('admin.teachers.index', compact('teachers'));
     }
 

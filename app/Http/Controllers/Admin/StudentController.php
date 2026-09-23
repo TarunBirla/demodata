@@ -16,7 +16,12 @@ class StudentController extends Controller
         $user = auth()->user();
         $schoolId = $user->school_id ?? 1;
 
-        $query = Student::with(['schoolClass', 'section', 'academicYear'])->where('school_id', $schoolId);
+        $query = Student::with(['schoolClass', 'section', 'academicYear', 'school']);
+        if ($user->role_name !== 'super_admin') {
+            $query->where('school_id', $schoolId);
+        } elseif ($request->filled('school_id')) {
+            $query->where('school_id', $request->school_id);
+        }
 
         if ($user->role_name === 'teacher') {
             $teacherIds = array_filter([$user->id, $user->teacher?->id]);
@@ -29,13 +34,18 @@ class StudentController extends Controller
             $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
             $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
 
-            $query->where(function($q) use ($allAssignedClassIds, $allAssignedSecIds) {
-                $q->whereIn('class_id', $allAssignedClassIds)
-                  ->orWhereIn('section_id', $allAssignedSecIds);
-            });
-
-            $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
-            $sections = Section::where('school_id', $schoolId)->whereIn('id', $allAssignedSecIds)->get();
+            if (!empty($allAssignedClassIds) || !empty($allAssignedSecIds)) {
+                $query->where(function($q) use ($allAssignedClassIds, $allAssignedSecIds) {
+                    $q->whereIn('class_id', $allAssignedClassIds)
+                      ->orWhereIn('section_id', $allAssignedSecIds);
+                });
+                $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
+                $sections = Section::where('school_id', $schoolId)->whereIn('id', $allAssignedSecIds)->get();
+            } else {
+                $query->whereRaw('1 = 0');
+                $classes = collect();
+                $sections = collect();
+            }
         } elseif ($user->role_name === 'student') {
             $query->where('user_id', $user->id);
             $classes = SchoolClass::where('school_id', $schoolId)->get();
@@ -54,8 +64,8 @@ class StudentController extends Controller
             $classes = SchoolClass::where('school_id', $schoolId)->get();
             $sections = Section::where('school_id', $schoolId)->get();
         } else {
-            $classes = SchoolClass::where('school_id', $schoolId)->get();
-            $sections = Section::where('school_id', $schoolId)->get();
+            $classes = $user->role_name === 'super_admin' ? SchoolClass::all() : SchoolClass::where('school_id', $schoolId)->get();
+            $sections = $user->role_name === 'super_admin' ? Section::all() : Section::where('school_id', $schoolId)->get();
         }
 
         if ($request->filled('search')) {

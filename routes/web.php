@@ -269,8 +269,12 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // System Settings & Roles (SUPER ADMIN ONLY)
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:super_admin');
     Route::post('/settings', [SettingController::class, 'updateSettings'])->name('settings.update')->middleware('role:super_admin');
+    Route::post('/settings/schools', [SettingController::class, 'storeSchool'])->name('settings.school.store')->middleware('role:super_admin');
+    Route::put('/settings/schools/{id}', [SettingController::class, 'updateSchool'])->name('settings.school.update')->middleware('role:super_admin');
     Route::post('/settings/roles', [SettingController::class, 'storeRole'])->name('settings.role.store')->middleware('role:super_admin');
     Route::put('/settings/roles/{id}', [SettingController::class, 'updateRole'])->name('settings.role.update')->middleware('role:super_admin');
     Route::delete('/settings/roles/{id}', [SettingController::class, 'destroyRole'])->name('settings.role.destroy')->middleware('role:super_admin');
     Route::post('/settings/users', [SettingController::class, 'storeUserAccount'])->name('settings.user.store')->middleware('role:super_admin');
+    Route::put('/settings/users/{id}', [SettingController::class, 'updateUserAccount'])->name('settings.user.update')->middleware('role:super_admin');
+    Route::delete('/settings/users/{id}', [SettingController::class, 'destroyUserAccount'])->name('settings.user.destroy')->middleware('role:super_admin');
 });

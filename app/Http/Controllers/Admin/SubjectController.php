@@ -20,12 +20,20 @@ class SubjectController extends Controller
 
             $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
 
-            $subjects = Subject::where('school_id', $schoolId)
-                ->whereIn('id', $allAssignedSubjectIds)
-                ->latest()
-                ->get();
+            if (empty($allAssignedSubjectIds)) {
+                $subjects = collect();
+            } else {
+                $subjects = Subject::where('school_id', $schoolId)
+                    ->whereIn('id', $allAssignedSubjectIds)
+                    ->latest()
+                    ->get();
+            }
         } else {
-            $subjects = Subject::where('school_id', $schoolId)->latest()->get();
+            $query = Subject::with('school')->latest();
+            if ($user->role_name !== 'super_admin') {
+                $query->where('school_id', $schoolId);
+            }
+            $subjects = $query->get();
         }
 
         return view('admin.subjects.index', compact('subjects'));

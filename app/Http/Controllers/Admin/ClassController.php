@@ -25,17 +25,25 @@ class ClassController extends Controller
             $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
             $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
 
-            $classes = SchoolClass::with(['sections' => function($q) use ($allAssignedSecIds) {
-                if (!empty($allAssignedSecIds)) {
-                    $q->whereIn('id', $allAssignedSecIds);
-                }
-            }])
-            ->where('school_id', $schoolId)
-            ->whereIn('id', $allAssignedClassIds)
-            ->orderBy('display_order')
-            ->get();
+            if (empty($allAssignedClassIds)) {
+                $classes = collect();
+            } else {
+                $classes = SchoolClass::with(['sections' => function($q) use ($allAssignedSecIds) {
+                    if (!empty($allAssignedSecIds)) {
+                        $q->whereIn('id', $allAssignedSecIds);
+                    }
+                }])
+                ->where('school_id', $schoolId)
+                ->whereIn('id', $allAssignedClassIds)
+                ->orderBy('display_order')
+                ->get();
+            }
         } else {
-            $classes = SchoolClass::with('sections')->where('school_id', $schoolId)->orderBy('display_order')->get();
+            $query = SchoolClass::with(['sections', 'school'])->orderBy('display_order');
+            if ($user->role_name !== 'super_admin') {
+                $query->where('school_id', $schoolId);
+            }
+            $classes = $query->get();
         }
 
         return view('admin.classes.index', compact('classes'));

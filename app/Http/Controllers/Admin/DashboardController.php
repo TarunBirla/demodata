@@ -62,11 +62,12 @@ class DashboardController extends Controller
 
         if ($userRole === 'teacher') {
             $teacherObj = Teacher::where('user_id', $user->id)->first();
-            $mySections = Section::where('teacher_id', $user->id)->with('schoolClass')->get();
-            $myHomework = Homework::where('school_id', $schoolId)->latest()->take(5)->get();
+            $teacherIds = array_filter([$user->id, $teacherObj?->id]);
+            $mySections = Section::whereIn('teacher_id', $teacherIds)->with('schoolClass')->get();
+            $myHomework = !empty($teacherIds) ? Homework::whereIn('teacher_id', $teacherIds)->latest()->take(5)->get() : collect();
 
             $roleContext['title'] = 'Teacher Portal Dashboard';
-            $roleContext['subtitle'] = 'Welcome, ' . ($teacherObj->full_name ?? $user->name) . ' (' . ($teacherObj->designation ?? 'Senior Faculty') . ')';
+            $roleContext['subtitle'] = 'Welcome, ' . ($teacherObj->full_name ?? $user->name) . ' (' . ($teacherObj->designation ?? 'Faculty Member') . ')';
             $roleContext['teacher'] = $teacherObj;
             $roleContext['mySections'] = $mySections;
             $roleContext['myHomework'] = $myHomework;

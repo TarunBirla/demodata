@@ -30,7 +30,7 @@ class AttendanceController extends Controller
 
             $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
         } else {
-            $classes = SchoolClass::where('school_id', $schoolId)->get();
+            $classes = $user->role_name === 'super_admin' ? SchoolClass::all() : SchoolClass::where('school_id', $schoolId)->get();
         }
 
         $classId = $request->class_id ?? ($classes->first()->id ?? null);
@@ -93,6 +93,23 @@ class AttendanceController extends Controller
             'date' => 'required|date',
             'attendance' => 'required|array',
         ]);
+
+        $user = auth()->user();
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $assignedSecIds = Section::whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
+            $ttSecIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('section_id')->toArray();
+            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $secClassIds = Section::whereIn('id', array_merge($assignedSecIds, $ttSecIds))->pluck('class_id')->toArray();
+
+            $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
+            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+
+            if (!in_array($validated['class_id'], $allAssignedClassIds) && !in_array($validated['section_id'], $allAssignedSecIds)) {
+                return back()->with('error', 'Access Restricted: You are not authorized to mark attendance for unassigned classes.');
+            }
+        }
 
         foreach ($validated['attendance'] as $studentId => $status) {
             StudentAttendance::updateOrCreate(
