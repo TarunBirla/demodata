@@ -30,7 +30,6 @@ class CMSController extends Controller
             'hero_badge',
             'hero_title',
             'hero_subtitle',
-            'hero_image',
             'principal_message',
             'stat_students',
             'stat_faculty',
@@ -38,17 +37,22 @@ class CMSController extends Controller
             'stat_classes',
         ]);
 
-        if ($request->filled('hero_image_select')) {
-            $fields['hero_image'] = $request->hero_image_select;
-        }
-
+        $heroImage = null;
         if ($request->hasFile('hero_image_file')) {
             $path = $request->file('hero_image_file')->store('cms', 'public');
-            $fields['hero_image'] = asset('storage/' . $path);
+            $heroImage = asset('storage/' . $path);
+        } elseif ($request->filled('hero_image_url')) {
+            $heroImage = trim($request->hero_image_url);
+        } elseif ($request->filled('hero_image_select')) {
+            $heroImage = trim($request->hero_image_select);
+        }
+
+        if ($heroImage) {
+            $fields['hero_image'] = $heroImage;
         }
 
         foreach ($fields as $key => $value) {
-            if ($value !== null) {
+            if ($value !== null && $value !== '') {
                 SchoolSetting::updateOrCreate(
                     ['school_id' => $schoolId, 'key' => $key],
                     ['value' => $value, 'group' => 'general']

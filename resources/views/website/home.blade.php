@@ -16,7 +16,7 @@
         .hero-bg-image {
             position: absolute;
             inset: 0;
-            background-image: url('{{ $settings["hero_image"] ?? "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80" }}');
+            background-image: url('{{ !empty($settings["hero_image"]) ? $settings["hero_image"] : "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80" }}');
             background-size: cover;
             background-position: center 30%;
             transform: scale(1.02);

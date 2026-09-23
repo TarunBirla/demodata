@@ -3,9 +3,14 @@
     'label' => null,
     'options' => [],
     'selected' => null,
+    'value' => null,
     'placeholder' => 'Select an option',
     'required' => false
 ])
+
+@php
+    $currentSelected = $selected ?? $value;
+@endphp
 
 <div class="mb-3">
     @if($label)
@@ -24,7 +29,7 @@
             <option value="">{{ $placeholder }}</option>
         @endif
         @foreach($options as $val => $text)
-            <option value="{{ $val }}" {{ (string)old($name, $selected) === (string)$val ? 'selected' : '' }}>
+            <option value="{{ $val }}" {{ (string)old($name, $currentSelected) === (string)$val ? 'selected' : '' }}>
                 {{ $text }}
             </option>
         @endforeach

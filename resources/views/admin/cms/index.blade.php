@@ -12,6 +12,20 @@
     <!-- HOMEPAGE HERO & BANNER CONTROL -->
     <div class="col-lg-12">
         <x-card title="Homepage Hero Section & Banner Manager" headerIcon="bi-sliders">
+            @php
+                $activeHeroImg = !empty($settings['hero_image']) ? $settings['hero_image'] : 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80';
+            @endphp
+            <div class="mb-4 p-3 bg-light rounded-3 border d-flex flex-column flex-md-row align-items-center gap-3">
+                <div class="rounded-3 overflow-hidden border shadow-sm flex-shrink-0" style="width: 200px; height: 110px;">
+                    <img src="{{ $activeHeroImg }}" id="heroPreviewImg" class="w-100 h-100 object-fit-cover" alt="Hero Banner Preview" onerror="this.src='https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80'">
+                </div>
+                <div>
+                    <span class="badge bg-success mb-1">Active Homepage Hero Banner</span>
+                    <h6 class="fw-bold text-dark mb-1">Current Banner Image Preview</h6>
+                    <div class="small text-muted text-break" style="font-size:0.78rem;">{{ $activeHeroImg }}</div>
+                </div>
+            </div>
+
             <form action="{{ route('admin.cms.hero.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
@@ -24,18 +38,23 @@
                     <div class="col-md-12">
                         <x-input name="hero_subtitle" label="Hero Subtitle Description" value="{{ $settings['hero_subtitle'] ?? 'Junior Gurukul School, Bhikangaon — blending traditional values with modern, holistic CBSE education.' }}" required />
                     </div>
-                    <div class="col-md-6">
-                        <x-select name="hero_image_select" label="Choose Hero Background Image (No URL Typing Needed!)" :options="[
+
+                    <div class="col-md-4">
+                        <x-select name="hero_image_select" label="Option 1: Choose Preset Photo Dropdown" :options="[
                             'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80' => 'Modern Campus & Classroom (Default)',
                             'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1800&q=80' => 'Students Graduation & Campus Building',
                             'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1800&q=80' => 'School Library & Reading Room',
                             'https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=1800&q=80' => 'Sports & Playground Activity'
-                        ]" :selected="$settings['hero_image'] ?? ''" />
+                        ]" :selected="$activeHeroImg" />
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-dark small">Or Upload Custom Banner Image</label>
-                        <input type="file" name="hero_image_file" class="form-control form-control-sm" accept="image/*">
+                    <div class="col-md-4">
+                        <label class="form-label fw-medium text-secondary small mb-1">Option 2: Upload Image File</label>
+                        <input type="file" name="hero_image_file" class="form-control form-control-md rounded-2" accept="image/*">
                     </div>
+                    <div class="col-md-4">
+                        <x-input name="hero_image_url" label="Option 3: Paste Direct Image URL" value="{{ filter_var($activeHeroImg, FILTER_VALIDATE_URL) ? $activeHeroImg : '' }}" placeholder="https://..." />
+                    </div>
+
                     <div class="col-md-12">
                         <label class="form-label fw-bold text-dark small">Principal's Message (Homepage & About)</label>
                         <textarea name="principal_message" class="form-control form-control-sm" rows="2" required>{{ $settings['principal_message'] ?? 'Welcome to Junior Gurukul School, Bhikangaon. We believe that true education nurtures both the intellect and character.' }}</textarea>

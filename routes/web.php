@@ -23,6 +23,61 @@ use App\Http\Controllers\Admin\SettingController;
 | Live Server Setup & Database Auto-Migration Routes
 |--------------------------------------------------------------------------
 */
+Route::get('/setup-storage', function () {
+    try {
+        @\Illuminate\Support\Facades\Artisan::call('storage:link');
+
+        $target = storage_path('app/public');
+        $link = public_path('storage');
+        if (!file_exists($link)) {
+            try {
+                @app('files')->link($target, $link);
+            } catch (\Throwable $e) {
+                @symlink($target, $link);
+            }
+        }
+
+        @\Illuminate\Support\Facades\Artisan::call('config:clear');
+        @\Illuminate\Support\Facades\Artisan::call('cache:clear');
+        @\Illuminate\Support\Facades\Artisan::call('view:clear');
+        @\Illuminate\Support\Facades\Artisan::call('route:clear');
+
+        return "<div style='font-family: Arial, sans-serif; padding: 40px; text-align: center; max-width: 600px; margin: 50px auto; border-radius: 16px; background: #E6FFFA; border: 2px solid #319795; color: #234E52; box-shadow: 0 10px 30px rgba(0,0,0,0.15);'>"
+            . "<h2 style='color: #2C7A7B; margin-top: 0;'>🔗 Storage Link & Image System Fixed Successfully!</h2>"
+            . "<p style='font-size: 16px; line-height: 1.6;'>Public storage symlink created and all view/config caches cleared for live server deployment.</p>"
+            . "<div style='margin-top: 25px;'>"
+            . "<a href='" . url('/') . "' style='display: inline-block; padding: 12px 28px; background: #319795; color: #FFFFFF; border-radius: 50px; text-decoration: none; font-weight: bold; margin-right: 10px;'>Open Website Homepage</a>"
+            . "<a href='" . url('/admin/cms') . "' style='display: inline-block; padding: 12px 28px; background: #2B6CB0; color: #FFFFFF; border-radius: 50px; text-decoration: none; font-weight: bold;'>Open Admin CMS Manager</a>"
+            . "</div>"
+            . "</div>";
+    } catch (\Throwable $e) {
+        return "<div style='font-family: Arial, sans-serif; padding: 40px; max-width: 700px; margin: 50px auto; border-radius: 16px; background: #FFF5F5; border: 2px solid #E53E3E; color: #742A2A; box-shadow: 0 10px 30px rgba(0,0,0,0.15);'>"
+            . "<h2 style='color: #C53030; margin-top: 0;'>❌ Storage Fix Error</h2>"
+            . "<p><strong>Message:</strong> " . e($e->getMessage()) . "</p>"
+            . "</div>";
+    }
+});
+
+Route::get('/clear-cache', function () {
+    try {
+        @\Illuminate\Support\Facades\Artisan::call('config:clear');
+        @\Illuminate\Support\Facades\Artisan::call('cache:clear');
+        @\Illuminate\Support\Facades\Artisan::call('view:clear');
+        @\Illuminate\Support\Facades\Artisan::call('route:clear');
+        @\Illuminate\Support\Facades\Artisan::call('optimize:clear');
+
+        return "<div style='font-family: Arial, sans-serif; padding: 40px; text-align: center; max-width: 600px; margin: 50px auto; border-radius: 16px; background: #E6FFFA; border: 2px solid #319795; color: #234E52; box-shadow: 0 10px 30px rgba(0,0,0,0.15);'>"
+            . "<h2 style='color: #2C7A7B; margin-top: 0;'>⚡ All Caches Cleared Successfully!</h2>"
+            . "<p style='font-size: 16px; line-height: 1.6;'>Config, View, Route, and Application cache cleared.</p>"
+            . "<div style='margin-top: 25px;'>"
+            . "<a href='" . url('/') . "' style='display: inline-block; padding: 12px 28px; background: #319795; color: #FFFFFF; border-radius: 50px; text-decoration: none; font-weight: bold;'>Open Website</a>"
+            . "</div>"
+            . "</div>";
+    } catch (\Throwable $e) {
+        return "Cache clear error: " . e($e->getMessage());
+    }
+});
+
 Route::get('/setup-db', function () {
     try {
         // 1. Ensure storage directories exist with proper write permissions for sessions & cache
@@ -50,7 +105,8 @@ Route::get('/setup-db', function () {
             }
         }
 
-        // 3. Clear all cached configs and sessions
+        // 3. Clear all cached configs and sessions & create storage link
+        @\Illuminate\Support\Facades\Artisan::call('storage:link');
         @\Illuminate\Support\Facades\Artisan::call('config:clear');
         @\Illuminate\Support\Facades\Artisan::call('cache:clear');
         @\Illuminate\Support\Facades\Artisan::call('view:clear');
