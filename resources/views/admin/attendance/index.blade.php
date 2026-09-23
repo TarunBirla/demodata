@@ -11,10 +11,10 @@
 <x-card>
     <form action="{{ route('admin.attendance.index') }}" method="GET" class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
-            <x-select name="class_id" label="Class" :options="$classes->pluck('name', 'id')->toArray()" :selected="$classId" />
+            <x-select name="class_id" label="Class Choice" :options="$classes->pluck('name', 'id')->toArray()" :selected="$classId" />
         </div>
         <div class="col-md-3">
-            <x-select name="section_id" label="Section" :options="$sections->pluck('name', 'id')->toArray()" :selected="$sectionId" />
+            <x-select name="section_id" label="Section Choice" :options="$sections->pluck('name', 'id')->toArray()" :selected="$sectionId" />
         </div>
         <div class="col-md-3">
             <x-input name="date" label="Attendance Date" type="date" value="{{ $date }}" />
@@ -25,6 +25,14 @@
     </form>
 
     @if($students->count() > 0)
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="fw-bold text-dark">Student Register ({{ $students->count() }} Students)</span>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-success" onclick="document.querySelectorAll('.btn-check[value=present]').forEach(r => r.checked = true)">Mark All Present</button>
+                <button type="button" class="btn btn-outline-danger" onclick="document.querySelectorAll('.btn-check[value=absent]').forEach(r => r.checked = true)">Mark All Absent</button>
+            </div>
+        </div>
+
         <form action="{{ route('admin.attendance.store') }}" method="POST">
             @csrf
             <input type="hidden" name="class_id" value="{{ $classId }}">
@@ -57,7 +65,7 @@
             </x-table>
 
             <div class="text-end mt-4">
-                <x-button type="submit" variant="navy" icon="bi-save">Submit & Lock Attendance Register</x-button>
+                <x-button type="submit" variant="navy" icon="bi-save">Submit & Save Attendance Register</x-button>
             </div>
         </form>
     @else

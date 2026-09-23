@@ -32,8 +32,9 @@ class StudentController extends Controller
 
         $students = $query->paginate(15);
         $classes = SchoolClass::where('school_id', $schoolId)->get();
+        $sections = Section::where('school_id', $schoolId)->get();
 
-        return view('admin.students.index', compact('students', 'classes'));
+        return view('admin.students.index', compact('students', 'classes', 'sections'));
     }
 
     public function create()
@@ -70,6 +71,37 @@ class StudentController extends Controller
         ]));
 
         return redirect()->route('admin.students.index')->with('success', 'Student added successfully with Admission No: ' . $admissionNo);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $student = Student::where('school_id', $schoolId)->findOrFail($id);
+
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'gender' => 'required|string',
+            'dob' => 'required|date',
+            'class_id' => 'required|exists:school_classes,id',
+            'section_id' => 'required|exists:sections,id',
+            'phone' => 'nullable|string',
+            'email' => 'nullable|email',
+            'status' => 'required|string',
+        ]);
+
+        $student->update($validated);
+
+        return redirect()->route('admin.students.index')->with('success', 'Student profile updated successfully!');
+    }
+
+    public function destroy($id)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $student = Student::where('school_id', $schoolId)->findOrFail($id);
+        $student->delete();
+
+        return redirect()->route('admin.students.index')->with('success', 'Student record deleted successfully.');
     }
 
     public function show($id)

@@ -52,7 +52,53 @@
                 <td>{{ $st->phone ?? '+91 98765 00000' }}</td>
                 <td><x-badge variant="success">{{ strtoupper($st->status) }}</x-badge></td>
                 <td>
-                    <a href="{{ route('admin.students.show', $st->id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i> View Profile</a>
+                    <div class="d-flex align-items-center gap-1">
+                        <a href="{{ route('admin.students.show', $st->id) }}" class="btn btn-sm btn-outline-primary" title="View Profile"><i class="bi bi-eye"></i></a>
+                        <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editStudentModal{{ $st->id }}" title="Edit Student"><i class="bi bi-pencil"></i></button>
+                        <form action="{{ route('admin.students.destroy', $st->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete student {{ $st->full_name }}?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Student"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </div>
+
+                    <!-- EDIT STUDENT MODAL -->
+                    <x-modal id="editStudentModal{{ $st->id }}" title="Edit Student — {{ $st->full_name }}">
+                        <form action="{{ route('admin.students.update', $st->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <x-input name="first_name" label="First Name" value="{{ $st->first_name }}" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-input name="last_name" label="Last Name" value="{{ $st->last_name }}" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-select name="gender" label="Gender" :options="['male' => 'Male', 'female' => 'Female']" :value="$st->gender" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-input name="dob" label="Date of Birth" type="date" value="{{ $st->dob ? \Carbon\Carbon::parse($st->dob)->format('Y-m-d') : '' }}" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-select name="class_id" label="Class" :options="$classes->pluck('name', 'id')->toArray()" :value="$st->class_id" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-select name="section_id" label="Section" :options="$sections->pluck('name', 'id')->toArray()" :value="$st->section_id" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-input name="phone" label="Contact Phone" value="{{ $st->phone }}" />
+                                </div>
+                                <div class="col-md-6">
+                                    <x-select name="status" label="Status" :options="['active' => 'Active', 'archived' => 'Archived', 'graduated' => 'Graduated']" :value="$st->status" required />
+                                </div>
+                            </div>
+                            <div class="text-end mt-3">
+                                <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</button>
+                                <x-button type="submit" variant="navy" icon="bi-check-lg">Update Student</x-button>
+                            </div>
+                        </form>
+                    </x-modal>
                 </td>
             </tr>
         @empty
@@ -87,7 +133,10 @@
                 <x-input name="dob" label="Date of Birth" type="date" required value="2012-05-10" />
             </div>
             <div class="col-md-6">
-                <x-select name="class_id" label="Class" :options="$classes->pluck('name', 'id')->toArray()" required />
+                <x-select name="class_id" label="Class Choice" :options="$classes->pluck('name', 'id')->toArray()" required />
+            </div>
+            <div class="col-md-6">
+                <x-select name="section_id" label="Section Choice" :options="$sections->pluck('name', 'id')->toArray()" required />
             </div>
             <div class="col-md-6">
                 <x-input name="phone" label="Contact Phone" placeholder="+91 98765 43210" />

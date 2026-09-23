@@ -9,6 +9,9 @@ use App\Models\FeePayment;
 use App\Models\FeeStructure;
 use App\Models\Student;
 
+use App\Models\SchoolClass;
+use App\Models\AcademicYear;
+
 class FeeController extends Controller
 {
     public function index()
@@ -21,9 +24,10 @@ class FeeController extends Controller
 
         $recentPayments = FeePayment::with('student')->where('school_id', $schoolId)->latest()->paginate(15);
         $students = Student::where('school_id', $schoolId)->get();
-        $feeStructures = FeeStructure::where('school_id', $schoolId)->get();
+        $classes = SchoolClass::where('school_id', $schoolId)->get();
+        $feeStructures = FeeStructure::with('schoolClass')->where('school_id', $schoolId)->get();
 
-        return view('admin.fees.index', compact('totalCollected', 'totalExpected', 'totalPending', 'recentPayments', 'students', 'feeStructures'));
+        return view('admin.fees.index', compact('totalCollected', 'totalExpected', 'totalPending', 'recentPayments', 'students', 'classes', 'feeStructures'));
     }
 
     public function collect(Request $request)
@@ -73,5 +77,62 @@ class FeeController extends Controller
         ]);
 
         return back()->with('success', 'Fee payment of ₹' . number_format($validated['amount'], 2) . ' collected successfully. Receipt: ' . $receiptNo);
+    }
+
+    public function storeStructure(Request $request)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $acadYear = AcademicYear::where('school_id', $schoolId)->first();
+
+        $validated = $request->validate([
+            'class_id' => 'required|exists:school_classes,id',
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'frequency' => 'required|string',
+            'due_date' => 'nullable|date',
+        ]);
+
+        FeeStructure::create(array_merge($validated, [
+            'school_id' => $schoolId,
+            'academic_year_id' => $acadYear->id ?? 1,
+        ]));
+
+        return back()->with('success', 'Fee structure created successfully!');
+    }
+
+    public function updateStructure(Request $request, $id)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $structure = FeeStructure::where('school_id', $schoolId)->findOrFail($id);
+
+        $validated = $request->validate([
+            'class_id' => 'required|exists:school_classes,id',
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'frequency' => 'required|string',
+            'due_date' => 'nullable|date',
+        ]);
+
+        $structure->update($validated);
+
+        return back()->with('success', 'Fee structure updated successfully!');
+    }
+
+    public function destroyStructure($id)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $structure = FeeStructure::where('school_id', $schoolId)->findOrFail($id);
+        $structure->delete();
+
+        return back()->with('success', 'Fee structure deleted successfully.');
+    }
+
+    public function destroyPayment($id)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $payment = FeePayment::where('school_id', $schoolId)->findOrFail($id);
+        $payment->delete();
+
+        return back()->with('success', 'Fee receipt deleted successfully.');
     }
 }

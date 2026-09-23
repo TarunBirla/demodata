@@ -67,4 +67,13 @@ class AttendanceController extends Controller
 
         return back()->with('success', 'Attendance recorded successfully for ' . $validated['date']);
     }
+
+    public function destroy($id)
+    {
+        $schoolId = auth()->user()->school_id ?? 1;
+        $attendance = StudentAttendance::where('school_id', $schoolId)->findOrFail($id);
+        $attendance->delete();
+
+        return back()->with('success', 'Attendance record deleted successfully.');
+    }
 }
