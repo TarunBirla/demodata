@@ -16,13 +16,31 @@ class FeeController extends Controller
 {
     public function index()
     {
-        $schoolId = auth()->user()->school_id ?? 1;
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
 
-        $totalCollected = FeePayment::where('school_id', $schoolId)->sum('amount');
-        $totalExpected = StudentFee::where('school_id', $schoolId)->sum('amount');
+        $paymentsQuery = FeePayment::with('student')->where('school_id', $schoolId);
+        $expectedQuery = StudentFee::where('school_id', $schoolId);
+
+        if ($user->role_name === 'student') {
+            $student = $user->student;
+            $studentIds = $student ? [$student->id] : [];
+            $paymentsQuery->whereIn('student_id', $studentIds);
+            $expectedQuery->whereIn('student_id', $studentIds);
+        } elseif ($user->role_name === 'parent') {
+            $parentProfile = $user->parentProfile;
+            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
+            $linkedStudentParentId = Student::where('parent_id', $user->id)->pluck('id')->toArray();
+            $studentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+            $paymentsQuery->whereIn('student_id', $studentIds);
+            $expectedQuery->whereIn('student_id', $studentIds);
+        }
+
+        $totalCollected = (clone $paymentsQuery)->sum('amount');
+        $totalExpected = (clone $expectedQuery)->sum('amount');
         $totalPending = max(0, $totalExpected - $totalCollected);
 
-        $recentPayments = FeePayment::with('student')->where('school_id', $schoolId)->latest()->paginate(15);
+        $recentPayments = $paymentsQuery->latest()->paginate(15);
         $students = Student::where('school_id', $schoolId)->get();
         $classes = SchoolClass::where('school_id', $schoolId)->get();
         $feeStructures = FeeStructure::with('schoolClass')->where('school_id', $schoolId)->get();

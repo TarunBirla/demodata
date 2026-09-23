@@ -36,6 +36,23 @@ class StudentController extends Controller
 
             $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
             $sections = Section::where('school_id', $schoolId)->whereIn('id', $allAssignedSecIds)->get();
+        } elseif ($user->role_name === 'student') {
+            $query->where('user_id', $user->id);
+            $classes = SchoolClass::where('school_id', $schoolId)->get();
+            $sections = Section::where('school_id', $schoolId)->get();
+        } elseif ($user->role_name === 'parent') {
+            $parentProfile = $user->parentProfile;
+            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
+            $linkedStudentParentId = Student::where('parent_id', $user->id)->pluck('id')->toArray();
+            $allStudentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+
+            if (!empty($allStudentIds)) {
+                $query->whereIn('id', $allStudentIds);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+            $classes = SchoolClass::where('school_id', $schoolId)->get();
+            $sections = Section::where('school_id', $schoolId)->get();
         } else {
             $classes = SchoolClass::where('school_id', $schoolId)->get();
             $sections = Section::where('school_id', $schoolId)->get();

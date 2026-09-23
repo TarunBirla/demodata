@@ -47,7 +47,29 @@ class AttendanceController extends Controller
         $students = collect();
         $existingAttendance = [];
 
-        if ($classId && $sectionId) {
+        if ($user->role_name === 'student') {
+            $student = $user->student;
+            if ($student) {
+                $students = collect([$student]);
+                $existingAttendance = StudentAttendance::where('school_id', $schoolId)
+                    ->where('student_id', $student->id)
+                    ->pluck('status', 'date')
+                    ->toArray();
+            }
+        } elseif ($user->role_name === 'parent') {
+            $parentProfile = $user->parentProfile;
+            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
+            $linkedStudentParentId = Student::where('parent_id', $user->id)->pluck('id')->toArray();
+            $allStudentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+
+            if (!empty($allStudentIds)) {
+                $students = Student::whereIn('id', $allStudentIds)->get();
+                $existingAttendance = StudentAttendance::where('school_id', $schoolId)
+                    ->whereIn('student_id', $allStudentIds)
+                    ->pluck('status', 'date')
+                    ->toArray();
+            }
+        } elseif ($classId && $sectionId) {
             $students = Student::where('school_id', $schoolId)->where('class_id', $classId)->where('section_id', $sectionId)->get();
             $existingAttendance = StudentAttendance::where('school_id', $schoolId)
                 ->where('class_id', $classId)

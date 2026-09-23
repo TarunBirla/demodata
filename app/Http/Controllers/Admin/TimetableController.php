@@ -29,6 +29,32 @@ class TimetableController extends Controller
         if ($user->role_name === 'teacher') {
             $teacherIds = array_filter([$user->id, $user->teacher?->id]);
             $query->whereIn('teacher_id', $teacherIds);
+        } elseif ($user->role_name === 'student') {
+            $student = $user->student;
+            if ($student && $student->class_id && $student->section_id) {
+                $query->where('class_id', $student->class_id)
+                      ->where('section_id', $student->section_id);
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($user->role_name === 'parent') {
+            $parentProfile = $user->parentProfile;
+            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
+            $linkedStudentParentId = \App\Models\Student::where('parent_id', $user->id)->pluck('id')->toArray();
+            $allStudentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+            $students = \App\Models\Student::whereIn('id', $allStudentIds)->get(['class_id', 'section_id']);
+
+            if ($students->isNotEmpty()) {
+                $query->where(function($q) use ($students) {
+                    foreach ($students as $st) {
+                        $q->orWhere(function($subQ) use ($st) {
+                            $subQ->where('class_id', $st->class_id)->where('section_id', $st->section_id);
+                        });
+                    }
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
         }
 
         $timetables = $query->get();
