@@ -8,7 +8,7 @@
         /* ===== Full-bleed Hero ===== */
         .hero-fullbleed {
             position: relative;
-            padding: 150px 0 100px;
+            padding: 56px 0 100px;
             overflow: hidden;
             color: #fff;
         }
@@ -318,7 +318,7 @@
                         </div>
                     </div>
 
-                    <div class="hero-stat-item d-flex align-items-center gap-3">
+                    <!-- <div class="hero-stat-item d-flex align-items-center gap-3">
                         <div class="hero-stat-icon rounded-circle d-flex align-items-center justify-content-center">
                             <i class="bi bi-shield-check fs-4"></i>
                         </div>
@@ -326,7 +326,7 @@
                             <div class="fw-bold text-white small" style="font-family: var(--font-heading);">Safe & Nurturing</div>
                             <div class="small text-white-50" style="font-size: 0.75rem;">A caring campus for every child</div>
                         </div>
-                    </div>
+                    </div> -->
 
                 </div>
             </div>
@@ -601,9 +601,13 @@
                                 <i class="bi bi-quote d-block mb-2"></i>
                                 <p class="text-white-50 mb-4" style="line-height: 1.7;">"{{ $t->content }}"</p>
                                 <div class="d-flex align-items-center gap-3 border-top border-secondary pt-3">
-                                    <div class="rounded-circle text-navy fw-bold d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: linear-gradient(145deg, #E4C185, #C5A059); color: #0B192C;">
-                                        {{ strtoupper(substr($t->name, 0, 1)) }}
-                                    </div>
+                                    @if($t->photo)
+                                        <img src="{{ $t->photo }}" class="rounded-circle object-fit-cover shadow-sm" style="width: 44px; height: 44px; border: 2px solid var(--gold-primary);" alt="{{ $t->name }}">
+                                    @else
+                                        <div class="rounded-circle text-navy fw-bold d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: linear-gradient(145deg, #E4C185, #C5A059); color: #0B192C;">
+                                            {{ strtoupper(substr($t->name, 0, 1)) }}
+                                        </div>
+                                    @endif
                                     <div>
                                         <div class="fw-bold small text-white" style="font-family: var(--font-heading);">{{ $t->name }}</div>
                                         <div class="text-white-50" style="font-size: 0.75rem;">{{ $t->role }}</div>
@@ -678,7 +682,7 @@
                             <div class="hover-card h-100 border">
                                 <div class="card-img-wrapper position-relative" style="height: 190px;">
                                     <span class="news-date-badge">{{ $n->published_at ? $n->published_at->format('d M') : 'Sep 15' }}</span>
-                                    <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80" class="w-100 h-100 object-fit-cover" alt="News Image">
+                                    <img src="{{ $n->image ?? 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80' }}" class="w-100 h-100 object-fit-cover" alt="{{ $n->title }}">
                                 </div>
                                 <div class="p-4">
                                     <h6 class="fw-bold text-dark mb-2" style="font-family: var(--font-heading);">{{ $n->title }}</h6>

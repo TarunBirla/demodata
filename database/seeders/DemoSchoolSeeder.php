@@ -109,13 +109,88 @@ class DemoSchoolSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // 5. Teachers & Staff
+        // 5. Teachers & Staff (10 Teachers with real photos)
         $teacherData = [
-            ['name' => 'Vikram Malhotra', 'email' => 'vikram.m@greenvalley.edu', 'sub' => 'Mathematics', 'qual' => 'M.Sc. Mathematics, B.Ed.'],
-            ['name' => 'Priya Sen', 'email' => 'priya.s@greenvalley.edu', 'sub' => 'English Literature', 'qual' => 'M.A. English, B.Ed.'],
-            ['name' => 'Anil Verma', 'email' => 'anil.v@greenvalley.edu', 'sub' => 'Physics', 'qual' => 'M.Sc. Physics'],
-            ['name' => 'Sunita Rao', 'email' => 'sunita.r@greenvalley.edu', 'sub' => 'Chemistry', 'qual' => 'M.Sc. Chemistry'],
-            ['name' => 'Meenakshi Iyer', 'email' => 'meenakshi.i@greenvalley.edu', 'sub' => 'Biology', 'qual' => 'Ph.D. Botany'],
+            [
+                'name' => 'Vikram Malhotra',
+                'email' => 'vikram.m@juniorgurukulschool.in',
+                'sub' => 'Mathematics',
+                'qual' => 'M.Sc. Mathematics, B.Ed.',
+                'desig' => 'Senior Mathematics Faculty',
+                'photo' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Priya Sen',
+                'email' => 'priya.s@juniorgurukulschool.in',
+                'sub' => 'English Literature',
+                'qual' => 'M.A. English, B.Ed.',
+                'desig' => 'Head of English Dept.',
+                'photo' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Anil Verma',
+                'email' => 'anil.v@juniorgurukulschool.in',
+                'sub' => 'Physics',
+                'qual' => 'M.Sc. Physics, M.Phil.',
+                'desig' => 'Senior Physics Faculty',
+                'photo' => 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Sunita Rao',
+                'email' => 'sunita.r@juniorgurukulschool.in',
+                'sub' => 'Chemistry',
+                'qual' => 'M.Sc. Chemistry, B.Ed.',
+                'desig' => 'Chemistry Department Head',
+                'photo' => 'https://images.unsplash.com/photo-1580894732413-8472f8832a82?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Meenakshi Iyer',
+                'email' => 'meenakshi.i@juniorgurukulschool.in',
+                'sub' => 'Biology',
+                'qual' => 'Ph.D. Botany, B.Ed.',
+                'desig' => 'Life Sciences Lead',
+                'photo' => 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Rajesh Chouhan',
+                'email' => 'rajesh.c@juniorgurukulschool.in',
+                'sub' => 'Computer Science',
+                'qual' => 'M.Tech Computer Science',
+                'desig' => 'STEM & Coding Director',
+                'photo' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Kavita Joshi',
+                'email' => 'kavita.j@juniorgurukulschool.in',
+                'sub' => 'Social Science',
+                'qual' => 'M.A. History & Civics, B.Ed.',
+                'desig' => 'Social Science Mentor',
+                'photo' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Devendra Solanki',
+                'email' => 'devendra.s@juniorgurukulschool.in',
+                'sub' => 'Physical Education',
+                'qual' => 'M.P.Ed., Sports Specialist',
+                'desig' => 'Head Sports Coach',
+                'photo' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Anjali Deshmukh',
+                'email' => 'anjali.d@juniorgurukulschool.in',
+                'sub' => 'Primary Education',
+                'qual' => 'M.A. Child Psychology, B.Ed.',
+                'desig' => 'Primary Wing Headmistress',
+                'photo' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'Rameshwar Shastri',
+                'email' => 'rameshwar.s@juniorgurukulschool.in',
+                'sub' => 'Sanskrit & Values',
+                'qual' => 'Acharya in Sanskrit, M.A.',
+                'desig' => 'Sanskar & Cultural Mentor',
+                'photo' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=500&q=80'
+            ]
         ];
 
         $teacherUsers = [];
@@ -139,29 +214,47 @@ class DemoSchoolSeeder extends Seeder
                 'phone' => $u->phone,
                 'email' => $u->email,
                 'dob' => '1985-05-15',
+                'photo' => $t['photo'],
                 'qualification' => $t['qual'],
                 'joining_date' => '2020-06-01',
-                'designation' => 'Senior Faculty',
+                'designation' => $t['desig'],
+                'status' => 'active',
             ]);
 
             $teacherUsers[] = $u;
         }
 
-        // 6. Classes & Sections
+        // 6. Classes & Sections (Pre-Primary to Grade 10)
         $classes = [];
         $sections = [];
-        for ($grade = 6; $grade <= 10; $grade++) {
+        $classList = [
+            ['name' => 'Nursery', 'num' => 0],
+            ['name' => 'LKG', 'num' => 0],
+            ['name' => 'UKG', 'num' => 0],
+            ['name' => 'Grade 1', 'num' => 1],
+            ['name' => 'Grade 2', 'num' => 2],
+            ['name' => 'Grade 3', 'num' => 3],
+            ['name' => 'Grade 4', 'num' => 4],
+            ['name' => 'Grade 5', 'num' => 5],
+            ['name' => 'Grade 6', 'num' => 6],
+            ['name' => 'Grade 7', 'num' => 7],
+            ['name' => 'Grade 8', 'num' => 8],
+            ['name' => 'Grade 9', 'num' => 9],
+            ['name' => 'Grade 10', 'num' => 10],
+        ];
+
+        foreach ($classList as $order => $cData) {
             $cls = SchoolClass::create([
                 'school_id' => $school->id,
-                'name' => "Grade $grade",
-                'numeric_value' => $grade,
-                'display_order' => $grade,
+                'name' => $cData['name'],
+                'numeric_value' => $cData['num'],
+                'display_order' => $order + 1,
                 'status' => 'active',
             ]);
             $classes[] = $cls;
 
             foreach (['A', 'B'] as $secIdx => $secName) {
-                $teacher = $teacherUsers[($grade + $secIdx) % count($teacherUsers)];
+                $teacher = $teacherUsers[($order + $secIdx) % count($teacherUsers)];
                 $sec = Section::create([
                     'school_id' => $school->id,
                     'class_id' => $cls->id,
@@ -178,9 +271,12 @@ class DemoSchoolSeeder extends Seeder
         $subjectsData = [
             ['name' => 'Mathematics', 'code' => 'MATH101', 'type' => 'theory'],
             ['name' => 'English Language', 'code' => 'ENG101', 'type' => 'theory'],
-            ['name' => 'Physics', 'code' => 'PHY101', 'type' => 'theory'],
-            ['name' => 'Chemistry', 'code' => 'CHEM101', 'type' => 'theory'],
-            ['name' => 'Computer Science', 'code' => 'CS101', 'type' => 'practical'],
+            ['name' => 'Physics & Science', 'code' => 'PHY101', 'type' => 'theory'],
+            ['name' => 'Chemistry & Experiments', 'code' => 'CHEM101', 'type' => 'practical'],
+            ['name' => 'Computer Science & Coding', 'code' => 'CS101', 'type' => 'practical'],
+            ['name' => 'Social Studies & Civics', 'code' => 'SST101', 'type' => 'theory'],
+            ['name' => 'Hindi & Literature', 'code' => 'HIN101', 'type' => 'theory'],
+            ['name' => 'Sanskrit & Vedic Values', 'code' => 'SAN101', 'type' => 'theory'],
         ];
 
         $subjectModels = [];
@@ -207,7 +303,7 @@ class DemoSchoolSeeder extends Seeder
         $parentUser = User::create([
             'school_id' => $school->id,
             'name' => 'Ramesh Gupta',
-            'email' => 'parent@greenvalley.edu',
+            'email' => 'parent@juniorgurukulschool.in',
             'role_name' => 'parent',
             'phone' => '+91 98222 33344',
             'password' => Hash::make('password123'),
@@ -221,8 +317,8 @@ class DemoSchoolSeeder extends Seeder
             'mother_name' => 'Sunita Gupta',
             'phone' => '+91 98222 33344',
             'email' => $parentUser->email,
-            'occupation' => 'Senior Software Architect',
-            'address' => 'Flat 402, Royal Palms, Sector 62, Noida',
+            'occupation' => 'Senior Businessman',
+            'address' => 'Kedwa Road, Bhikangaon, MP',
         ]);
 
         $studentNames = [
@@ -238,7 +334,7 @@ class DemoSchoolSeeder extends Seeder
 
         $studentModels = [];
         foreach ($studentNames as $idx => $st) {
-            $stEmail = strtolower($st['first']) . '.' . strtolower($st['last']) . '@greenvalley.edu';
+            $stEmail = strtolower($st['first']) . '.' . strtolower($st['last']) . '@juniorgurukulschool.in';
             $stUser = User::create([
                 'school_id' => $school->id,
                 'name' => $st['first'] . ' ' . $st['last'],
@@ -255,13 +351,13 @@ class DemoSchoolSeeder extends Seeder
             $studentObj = Student::create([
                 'school_id' => $school->id,
                 'user_id' => $stUser->id,
-                'admission_number' => 'GVIS-2026-' . sprintf('%04d', $idx + 101),
+                'admission_number' => 'JGS-2026-' . sprintf('%04d', $idx + 101),
                 'first_name' => $st['first'],
                 'last_name' => $st['last'],
                 'gender' => $st['gender'],
                 'dob' => '2012-08-20',
                 'blood_group' => 'O+',
-                'address' => 'Greater Noida, UP',
+                'address' => 'Bhikangaon, Madhya Pradesh',
                 'phone' => $stUser->phone,
                 'email' => $stUser->email,
                 'academic_year_id' => $academicYear->id,
@@ -278,7 +374,6 @@ class DemoSchoolSeeder extends Seeder
                 $parentObj->students()->attach($studentObj->id, ['relationship' => 'father']);
             }
 
-            // Attendance
             for ($d = 1; $d <= 5; $d++) {
                 StudentAttendance::create([
                     'school_id' => $school->id,
@@ -394,23 +489,207 @@ class DemoSchoolSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // 12. CMS Content
-        CmsNews::create([
-            'school_id' => $school->id,
-            'title' => 'Green Valley Students Win Regional Robotics Championship',
-            'slug' => 'robotics-championship-win',
-            'summary' => 'Our STEM team bagged 1st prize at the National EdTech Innovation Summit.',
-            'content' => 'We are proud to announce that the robotics team of Green Valley International School secured top honors at the National EdTech Innovation Summit...',
-            'published_at' => '2026-09-15',
-            'status' => 'published',
-        ]);
+        // 12. CMS Content (8 News Articles with unique images)
+        $newsItems = [
+            [
+                'title' => 'Junior Gurukul STEM Team Wins Regional Robotics Championship',
+                'slug' => 'robotics-championship-win',
+                'summary' => 'Our STEM & Coding team bagged 1st prize at the State EdTech Innovation Summit.',
+                'image' => 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'Annual Inter-House Athletics & Sports Meet Concludes',
+                'slug' => 'annual-sports-meet-2026',
+                'summary' => 'Over 400 students participated in sprint relays, long jump, and athletic games at Kedwa Road complex.',
+                'image' => 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'Sanskar & Vedic Cultural Heritage Festival Celebrated',
+                'slug' => 'cultural-heritage-festival',
+                'summary' => 'Students showcased classical music, shlok recitations, and folk dances celebrating Indian culture.',
+                'image' => 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'State-of-the-Art Interactive Digital Smart Classrooms Inaugurated',
+                'slug' => 'digital-smart-classrooms',
+                'summary' => 'Interactive flat panels and 3D visual learning modules deployed across all primary & middle grades.',
+                'image' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'District Level Science Fair: 80+ Student Projects Featured',
+                'slug' => 'district-science-fair',
+                'summary' => 'Junior Gurukul young scientists demonstrated renewable energy and AI robotics prototypes.',
+                'image' => 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'Tree Plantation & Environmental Awareness Drive at Bhikangaon',
+                'slug' => 'tree-plantation-drive',
+                'summary' => 'Over 300 saplings planted along Kedwa Road campus as part of Green Eco-Club initiative.',
+                'image' => 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'CBSE Board Examination Orientation & Stress Management Workshop',
+                'slug' => 'cbse-board-orientation',
+                'summary' => 'Senior academic counsellors guided Grade 9 & 10 students on exam strategy and time management.',
+                'image' => 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80',
+            ],
+            [
+                'title' => 'Art, Craft & Clay Modeling Exhibition Highlights Creativity',
+                'slug' => 'art-craft-exhibition',
+                'summary' => 'Pre-Primary and Primary wing children created stunning handicrafts and watercolor paintings.',
+                'image' => 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=800&q=80',
+            ]
+        ];
 
-        CmsTestimonial::create([
-            'school_id' => $school->id,
-            'name' => 'Mrs. Sunita Gupta',
-            'role' => 'Parent of Grade 8 Student',
-            'content' => 'Green Valley has provided an amazing learning environment for my children. The teachers are deeply dedicated and the facilities are world-class.',
-            'is_featured' => true,
-        ]);
+        foreach ($newsItems as $n) {
+            CmsNews::create([
+                'school_id' => $school->id,
+                'title' => $n['title'],
+                'slug' => $n['slug'],
+                'summary' => $n['summary'],
+                'content' => $n['summary'] . ' Full details and highlights of the event will be shared with parents via circulars.',
+                'image' => $n['image'],
+                'published_at' => '2026-09-15',
+                'status' => 'published',
+            ]);
+        }
+
+        // 13. Testimonials (8 Parents & Alumni with distinct photos)
+        $testimonialItems = [
+            [
+                'name' => 'Mrs. Sunita Gupta',
+                'role' => 'Parent of Grade 8 Scholar',
+                'photo' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80',
+                'content' => 'Junior Gurukul School has provided an amazing learning environment for my children. The teachers are deeply dedicated, individual attention is given to every child, and traditional values are taught every day.'
+            ],
+            [
+                'name' => 'Mr. Rajesh Patel',
+                'role' => 'Parent of Grade 5 & 10 Students',
+                'photo' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80',
+                'content' => 'The combination of smart classrooms, CBSE curriculum, and extracurricular activities at Junior Gurukul School Bhikangaon has brought tremendous confidence in both my children.'
+            ],
+            [
+                'name' => 'Dr. Meera Sharma',
+                'role' => 'Alumni Parent & Medical Doctor',
+                'photo' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80',
+                'content' => 'As a healthcare professional, I appreciate the holistic approach to health, yoga, and academics. My daughter received solid guidance from her mentors here.'
+            ],
+            [
+                'name' => 'Mr. Manoj Mahajan',
+                'role' => 'Parent from Bhikangaon Town',
+                'photo' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80',
+                'content' => 'Safe campus transport, disciplined environment, and approachable principal make Junior Gurukul the absolute best school choice in our region.'
+            ],
+            [
+                'name' => 'Mrs. Rekha Joshi',
+                'role' => 'Parent of Primary Wing Student',
+                'photo' => 'https://images.unsplash.com/photo-1580894732413-8472f8832a82?auto=format&fit=crop&w=300&q=80',
+                'content' => 'The teachers at Junior Gurukul are warm, patient, and truly care about every child. My son looks forward to going to school every single morning!'
+            ],
+            [
+                'name' => 'Mr. Anand Verma',
+                'role' => 'Parent of Grade 9 Student',
+                'photo' => 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=300&q=80',
+                'content' => 'The STEM labs and computer education here match top city schools while preserving Indian Sanskar and respect for elders.'
+            ],
+            [
+                'name' => 'Pooja Solanki',
+                'role' => 'Alumni - Class of 2024 (B.Tech Scholar)',
+                'photo' => 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80',
+                'content' => 'The strong foundation in mathematics and science I received at Junior Gurukul enabled me to clear competitive entrance exams with top scores.'
+            ],
+            [
+                'name' => 'Mr. Nitin Chouhan',
+                'role' => 'Parent & Local Entrepreneur',
+                'photo' => 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300&q=80',
+                'content' => 'Outstanding infrastructure, regular Parent-Teacher meetings, and transparent communication. We are very proud to be part of the Junior Gurukul family.'
+            ]
+        ];
+
+        foreach ($testimonialItems as $t) {
+            CmsTestimonial::create([
+                'school_id' => $school->id,
+                'name' => $t['name'],
+                'role' => $t['role'],
+                'photo' => $t['photo'],
+                'content' => $t['content'],
+                'is_featured' => true,
+                'status' => 'active',
+            ]);
+        }
+
+        // 14. Photo Gallery (10 items across categories)
+        $galleryItems = [
+            [
+                'title' => 'Interactive Digital Smart Classrooms',
+                'category' => 'Campus',
+                'image' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Smart boards and digital interactive learning.'
+            ],
+            [
+                'title' => 'Advanced STEM & Science Laboratories',
+                'category' => 'Science Lab',
+                'image' => 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Hands-on physics, chemistry, and biology experiments.'
+            ],
+            [
+                'title' => 'Annual Cultural & Music Festival',
+                'category' => 'Events',
+                'image' => 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Students performing traditional dances and music.'
+            ],
+            [
+                'title' => 'Annual Inter-House Athletics Meet',
+                'category' => 'Sports',
+                'image' => 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Track events and sports competitions at Kedwa Road.'
+            ],
+            [
+                'title' => 'Gurukul Morning Sanskar & Vedic Assembly',
+                'category' => 'Campus',
+                'image' => 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Daily prayers, shlok recitations, and value education.'
+            ],
+            [
+                'title' => 'Library & Knowledge Reading Centre',
+                'category' => 'Academics',
+                'image' => 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Rich collection of textbooks, reference books, and storybooks.'
+            ],
+            [
+                'title' => 'Computer & Coding Innovation Lab',
+                'category' => 'Technology',
+                'image' => 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'High-speed computer systems for digital literacy.'
+            ],
+            [
+                'title' => 'Yoga & Wellness Morning Activity',
+                'category' => 'Wellness',
+                'image' => 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Physical fitness, pranayam, and mental focus.'
+            ],
+            [
+                'title' => 'Art, Craft & Creative Exhibition',
+                'category' => 'Creative Arts',
+                'image' => 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Paintings and handicrafts crafted by students.'
+            ],
+            [
+                'title' => 'Junior Kindergarten Activity Playground',
+                'category' => 'Primary',
+                'image' => 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?auto=format&fit=crop&w=1200&q=80',
+                'desc' => 'Safe play arena for kindergarten learners.'
+            ]
+        ];
+
+        foreach ($galleryItems as $g) {
+            CmsGallery::create([
+                'school_id' => $school->id,
+                'title' => $g['title'],
+                'image_path' => $g['image'],
+                'category' => $g['category'],
+                'description' => $g['desc'],
+            ]);
+        }
     }
 }

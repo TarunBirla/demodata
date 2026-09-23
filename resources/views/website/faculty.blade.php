@@ -24,9 +24,13 @@
             @forelse($teachers as $t)
                 <div class="col-md-4 col-sm-6" data-aos="fade-up">
                     <div class="hover-card text-center p-4 h-100">
-                        <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 80px; height: 80px; font-size: 2rem; font-family: var(--font-heading); background: linear-gradient(145deg, #E4C185, var(--gold-primary) 55%, #8E6A32); color: #0B192C;">
-                            {{ strtoupper(substr($t->first_name, 0, 1)) }}
-                        </div>
+                        @if($t->photo)
+                            <img src="{{ $t->photo }}" class="rounded-circle mb-3 shadow object-fit-cover" style="width: 90px; height: 90px; border: 3px solid var(--gold-primary);" alt="{{ $t->full_name }}">
+                        @else
+                            <div class="rounded-circle text-white fw-bold d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 80px; height: 80px; font-size: 2rem; font-family: var(--font-heading); background: linear-gradient(145deg, #E4C185, var(--gold-primary) 55%, #8E6A32); color: #0B192C;">
+                                {{ strtoupper(substr($t->first_name, 0, 1)) }}
+                            </div>
+                        @endif
                         <h5 class="fw-bold text-dark mb-1" style="font-family: var(--font-heading);">{{ $t->full_name }}</h5>
                         <span class="badge-gold mb-2">{{ $t->designation }}</span>
                         <div class="small text-muted mb-1"><i class="bi bi-mortarboard me-1 text-gold"></i> {{ $t->qualification }}</div>
