@@ -24,4 +24,9 @@ class Notice extends Model
         'publish_date' => 'date',
         'expiry_date' => 'date',
     ];
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
 }

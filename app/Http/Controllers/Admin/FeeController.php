@@ -35,8 +35,6 @@ class FeeController extends Controller
         } elseif ($user->role_name === 'parent') {
             $parentProfile = $user->parentProfile;
             $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
-            $linkedStudentParentId = Student::where('parent_id', $user->id)->pluck('id')->toArray();
-            $studentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
             $paymentsQuery->whereIn('student_id', $studentIds);
             $expectedQuery->whereIn('student_id', $studentIds);
         }

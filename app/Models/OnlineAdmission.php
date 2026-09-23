@@ -30,6 +30,11 @@ class OnlineAdmission extends Model
         'dob' => 'date',
     ];
 
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
     public function applyingClass()
     {
         return $this->belongsTo(SchoolClass::class, 'applying_class_id');

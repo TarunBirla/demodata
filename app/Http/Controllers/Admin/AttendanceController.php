@@ -70,9 +70,7 @@ class AttendanceController extends Controller
             }
         } elseif ($user->role_name === 'parent') {
             $parentProfile = $user->parentProfile;
-            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
-            $linkedStudentParentId = Student::where('parent_id', $user->id)->pluck('id')->toArray();
-            $allStudentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+            $allStudentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
 
             if (!empty($allStudentIds)) {
                 $students = Student::whereIn('id', $allStudentIds)->get();

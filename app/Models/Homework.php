@@ -29,6 +29,11 @@ class Homework extends Model
         'due_date' => 'date',
     ];
 
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
     public function schoolClass()
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');

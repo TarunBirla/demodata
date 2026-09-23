@@ -11,6 +11,11 @@ class Section extends Model
 
     protected $fillable = ['school_id', 'class_id', 'name', 'capacity', 'teacher_id', 'status'];
 
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
     public function schoolClass()
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');

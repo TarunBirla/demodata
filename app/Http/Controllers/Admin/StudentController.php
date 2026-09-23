@@ -60,9 +60,7 @@ class StudentController extends Controller
             $sections = Section::where('school_id', $schoolId)->get();
         } elseif ($user->role_name === 'parent') {
             $parentProfile = $user->parentProfile;
-            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
-            $linkedStudentParentId = Student::where('parent_id', $user->id)->pluck('id')->toArray();
-            $allStudentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+            $allStudentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
 
             if (!empty($allStudentIds)) {
                 $query->whereIn('id', $allStudentIds);
@@ -196,7 +194,7 @@ class StudentController extends Controller
         if ($user->role_name === 'parent') {
             $parentProfile = $user->parentProfile;
             $parentStudentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
-            if (!in_array($student->id, $parentStudentIds) && $student->parent_id !== $user->id) {
+            if (!in_array($student->id, $parentStudentIds)) {
                 return redirect()->route('admin.dashboard')->with('error', 'Access Restricted: You can only view profiles of your linked children.');
             }
         }

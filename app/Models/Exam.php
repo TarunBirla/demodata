@@ -25,6 +25,11 @@ class Exam extends Model
         'is_published' => 'boolean',
     ];
 
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
     public function examSubjects()
     {
         return $this->hasMany(ExamSubject::class);

@@ -24,4 +24,9 @@ class Event extends Model
     protected $casts = [
         'event_date' => 'date',
     ];
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
 }

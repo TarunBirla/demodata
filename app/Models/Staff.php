@@ -29,6 +29,11 @@ class Staff extends Model
         'joining_date' => 'date',
     ];
 
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

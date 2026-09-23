@@ -47,9 +47,7 @@ class TimetableController extends Controller
             }
         } elseif ($user->role_name === 'parent') {
             $parentProfile = $user->parentProfile;
-            $studentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
-            $linkedStudentParentId = \App\Models\Student::where('parent_id', $user->id)->pluck('id')->toArray();
-            $allStudentIds = array_unique(array_merge($studentIds, $linkedStudentParentId));
+            $allStudentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
             $students = \App\Models\Student::whereIn('id', $allStudentIds)->get(['class_id', 'section_id']);
 
             if ($students->isNotEmpty()) {
