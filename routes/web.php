@@ -20,6 +20,48 @@ use App\Http\Controllers\Admin\SettingController;
 
 /*
 |--------------------------------------------------------------------------
+| Live Server Setup & Database Auto-Migration Routes
+|--------------------------------------------------------------------------
+*/
+Route::get('/setup-db', function () {
+    try {
+        // Ensure sqlite file exists if sqlite is active
+        if (config('database.default') === 'sqlite') {
+            $sqlitePath = database_path('database.sqlite');
+            if (!file_exists($sqlitePath)) {
+                @touch($sqlitePath);
+            }
+        }
+
+        @\Illuminate\Support\Facades\Artisan::call('config:clear');
+        @\Illuminate\Support\Facades\Artisan::call('cache:clear');
+        @\Illuminate\Support\Facades\Artisan::call('view:clear');
+
+        // Run migrate:fresh with seed and force flag for live servers
+        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+            '--force' => true,
+            '--seed' => true,
+        ]);
+
+        return "<div style='font-family: Arial, sans-serif; padding: 40px; text-align: center; max-width: 600px; margin: 50px auto; border-radius: 16px; background: #E6FFFA; border: 2px solid #319795; color: #234E52; box-shadow: 0 10px 30px rgba(0,0,0,0.15);'>"
+            . "<h2 style='color: #2C7A7B; margin-top: 0;'>✅ Database Setup Completed Successfully!</h2>"
+            . "<p style='font-size: 16px; line-height: 1.6;'>All tables, teachers, gallery photos, news items, and settings have been generated automatically.</p>"
+            . "<div style='margin-top: 25px;'>"
+            . "<a href='" . url('/') . "' style='display: inline-block; padding: 12px 28px; background: #319795; color: #FFFFFF; border-radius: 50px; text-decoration: none; font-weight: bold; margin-right: 10px;'>Open Website Homepage</a>"
+            . "<a href='" . url('/login') . "' style='display: inline-block; padding: 12px 28px; background: #2B6CB0; color: #FFFFFF; border-radius: 50px; text-decoration: none; font-weight: bold;'>Login to Admin Portal</a>"
+            . "</div>"
+            . "</div>";
+    } catch (\Throwable $e) {
+        return "<div style='font-family: Arial, sans-serif; padding: 40px; max-width: 700px; margin: 50px auto; border-radius: 16px; background: #FFF5F5; border: 2px solid #E53E3E; color: #742A2A; box-shadow: 0 10px 30px rgba(0,0,0,0.15);'>"
+            . "<h2 style='color: #C53030; margin-top: 0;'>❌ Database Setup Error</h2>"
+            . "<p><strong>Message:</strong> " . e($e->getMessage()) . "</p>"
+            . "<pre style='background: #FFFFFF; padding: 15px; border-radius: 8px; overflow: auto; font-size: 13px; text-align: left;'>" . e($e->getTraceAsString()) . "</pre>"
+            . "</div>";
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
 | Public School Website Routes (10 Dedicated Pages)
 |--------------------------------------------------------------------------
 */
