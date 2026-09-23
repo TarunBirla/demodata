@@ -16,12 +16,22 @@ class TimetableController extends Controller
 {
     public function index()
     {
-        $schoolId = auth()->user()->school_id ?? 1;
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
+
         $classes = SchoolClass::where('school_id', $schoolId)->get();
         $sections = Section::where('school_id', $schoolId)->get();
         $subjects = Subject::where('school_id', $schoolId)->get();
         $teachers = Teacher::where('school_id', $schoolId)->get();
-        $timetables = Timetable::with(['schoolClass', 'section', 'subject', 'teacher'])->where('school_id', $schoolId)->get();
+
+        $query = Timetable::with(['schoolClass', 'section', 'subject', 'teacher'])->where('school_id', $schoolId);
+
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $query->whereIn('teacher_id', $teacherIds);
+        }
+
+        $timetables = $query->get();
 
         return view('admin.timetable.index', compact('classes', 'sections', 'subjects', 'teachers', 'timetables'));
     }

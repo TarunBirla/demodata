@@ -13,9 +13,33 @@ class StudentController extends Controller
 {
     public function index(Request $request)
     {
-        $schoolId = auth()->user()->school_id ?? 1;
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
 
         $query = Student::with(['schoolClass', 'section', 'academicYear'])->where('school_id', $schoolId);
+
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $assignedSecIds = Section::whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
+            $ttSecIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('section_id')->toArray();
+            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $secClassIds = Section::whereIn('id', array_merge($assignedSecIds, $ttSecIds))->pluck('class_id')->toArray();
+
+            $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
+            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+
+            $query->where(function($q) use ($allAssignedClassIds, $allAssignedSecIds) {
+                $q->whereIn('class_id', $allAssignedClassIds)
+                  ->orWhereIn('section_id', $allAssignedSecIds);
+            });
+
+            $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
+            $sections = Section::where('school_id', $schoolId)->whereIn('id', $allAssignedSecIds)->get();
+        } else {
+            $classes = SchoolClass::where('school_id', $schoolId)->get();
+            $sections = Section::where('school_id', $schoolId)->get();
+        }
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -31,8 +55,6 @@ class StudentController extends Controller
         }
 
         $students = $query->paginate(15);
-        $classes = SchoolClass::where('school_id', $schoolId)->get();
-        $sections = Section::where('school_id', $schoolId)->get();
 
         return view('admin.students.index', compact('students', 'classes', 'sections'));
     }

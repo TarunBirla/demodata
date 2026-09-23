@@ -14,10 +14,33 @@ class AttendanceController extends Controller
 {
     public function index(Request $request)
     {
-        $schoolId = auth()->user()->school_id ?? 1;
-        $classes = SchoolClass::where('school_id', $schoolId)->get();
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
+
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $assignedSecIds = Section::whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
+            $ttSecIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('section_id')->toArray();
+            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $secClassIds = Section::whereIn('id', array_merge($assignedSecIds, $ttSecIds))->pluck('class_id')->toArray();
+
+            $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
+            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+
+            $classes = SchoolClass::where('school_id', $schoolId)->whereIn('id', $allAssignedClassIds)->get();
+        } else {
+            $classes = SchoolClass::where('school_id', $schoolId)->get();
+        }
+
         $classId = $request->class_id ?? ($classes->first()->id ?? null);
-        $sections = $classId ? Section::where('class_id', $classId)->get() : collect();
+
+        if ($user->role_name === 'teacher' && isset($allAssignedSecIds)) {
+            $sections = $classId ? Section::where('class_id', $classId)->whereIn('id', $allAssignedSecIds)->get() : collect();
+        } else {
+            $sections = $classId ? Section::where('class_id', $classId)->get() : collect();
+        }
+
         $sectionId = $request->section_id ?? ($sections->first()->id ?? null);
         $date = $request->date ?? date('Y-m-d');
 

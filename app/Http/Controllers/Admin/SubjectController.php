@@ -10,8 +10,24 @@ class SubjectController extends Controller
 {
     public function index()
     {
-        $schoolId = auth()->user()->school_id ?? 1;
-        $subjects = Subject::where('school_id', $schoolId)->latest()->get();
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
+
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $ttSubjectIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+            $csSubjectIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('subject_id')->toArray();
+
+            $allAssignedSubjectIds = array_unique(array_merge($ttSubjectIds, $csSubjectIds));
+
+            $subjects = Subject::where('school_id', $schoolId)
+                ->whereIn('id', $allAssignedSubjectIds)
+                ->latest()
+                ->get();
+        } else {
+            $subjects = Subject::where('school_id', $schoolId)->latest()->get();
+        }
+
         return view('admin.subjects.index', compact('subjects'));
     }
 

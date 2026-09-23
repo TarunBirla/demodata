@@ -16,8 +16,17 @@ class HomeworkController extends Controller
 {
     public function index()
     {
-        $schoolId = auth()->user()->school_id ?? 1;
-        $homeworkList = Homework::with(['schoolClass', 'section', 'subject', 'teacher'])->where('school_id', $schoolId)->latest()->get();
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
+
+        $query = Homework::with(['schoolClass', 'section', 'subject', 'teacher'])->where('school_id', $schoolId);
+
+        if ($user->role_name === 'teacher') {
+            $teacherIds = array_filter([$user->id, $user->teacher?->id]);
+            $query->whereIn('teacher_id', $teacherIds);
+        }
+
+        $homeworkList = $query->latest()->get();
         $classes = SchoolClass::where('school_id', $schoolId)->get();
         $sections = Section::where('school_id', $schoolId)->get();
         $subjects = Subject::where('school_id', $schoolId)->get();
@@ -28,7 +37,8 @@ class HomeworkController extends Controller
 
     public function store(Request $request)
     {
-        $schoolId = auth()->user()->school_id ?? 1;
+        $user = auth()->user();
+        $schoolId = $user->school_id ?? 1;
         $acadYear = AcademicYear::where('school_id', $schoolId)->first();
 
         $validated = $request->validate([
@@ -41,6 +51,10 @@ class HomeworkController extends Controller
             'assigned_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:assigned_date',
         ]);
+
+        if (empty($validated['teacher_id'])) {
+            $validated['teacher_id'] = $user->id;
+        }
 
         Homework::create(array_merge($validated, [
             'school_id' => $schoolId,

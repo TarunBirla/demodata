@@ -182,8 +182,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/students/{id}', [StudentController::class, 'update'])->name('students.update')->middleware('role:school_admin,super_admin');
     Route::delete('/students/{id}', [StudentController::class, 'destroy'])->name('students.destroy')->middleware('role:school_admin,super_admin');
 
-    // Teachers & Staff (Admin & Teacher View)
-    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index')->middleware('role:school_admin,super_admin,teacher');
+    // Teachers & Staff (Admin Only)
+    Route::get('/teachers', [TeacherController::class, 'index'])->name('teachers.index')->middleware('role:school_admin,super_admin');
     Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store')->middleware('role:school_admin,super_admin');
     Route::put('/teachers/{id}', [TeacherController::class, 'update'])->name('teachers.update')->middleware('role:school_admin,super_admin');
     Route::delete('/teachers/{id}', [TeacherController::class, 'destroy'])->name('teachers.destroy')->middleware('role:school_admin,super_admin');
@@ -199,8 +199,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::delete('/sections/{id}', [ClassController::class, 'destroySection'])->name('sections.destroy')->middleware('role:school_admin,super_admin');
 
     Route::get('/subjects', [SubjectController::class, 'index'])->name('subjects.index');
-    Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store')->middleware('role:school_admin,super_admin');
-    Route::put('/subjects/{id}', [SubjectController::class, 'update'])->name('subjects.update')->middleware('role:school_admin,super_admin');
+    Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store')->middleware('role:school_admin,super_admin,teacher');
+    Route::put('/subjects/{id}', [SubjectController::class, 'update'])->name('subjects.update')->middleware('role:school_admin,super_admin,teacher');
     Route::delete('/subjects/{id}', [SubjectController::class, 'destroy'])->name('subjects.destroy')->middleware('role:school_admin,super_admin');
 
     Route::get('/timetable', [TimetableController::class, 'index'])->name('timetable.index');

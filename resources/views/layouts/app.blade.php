@@ -181,7 +181,7 @@
             <a href="{{ route('admin.students.index') }}" class="nav-link-custom {{ request()->routeIs('admin.students*') ? 'active' : '' }}">
                 <i class="bi bi-people"></i> {{ ($isStudent || $isParent) ? 'My Profile & Directory' : 'Students' }}
             </a>
-            @if($isAdmin || $isTeacher)
+            @if($isAdmin)
             <a href="{{ route('admin.teachers.index') }}" class="nav-link-custom {{ request()->routeIs('admin.teachers*') ? 'active' : '' }}">
                 <i class="bi bi-person-badge"></i> Teachers
             </a>
