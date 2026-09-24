@@ -45,8 +45,45 @@ class DemoSchoolSeeder extends Seeder
             'tagline' => 'Nurturing Future Global Leaders',
             'phone' => '096176 14788',
             'email' => 'info@juniorgurukulschool.in',
-            'address' => 'Junior Gurukul School, Seavri Dhaam, Kedwa Road, Bhikangaon, M.P.',
             'principal_name' => 'Dr. Rajesh Sharma, Ph.D.',
+            'status' => 'active',
+        ]);
+
+        // 2. Settings for Primary School
+        $settings = [
+            'school_name' => 'Junior Gurukul School',
+            'school_tagline' => 'School · Bhikangaon, M.P.',
+            'school_email' => 'info@juniorgurukulschool.in',
+            'school_phone' => '096176 14788',
+            'school_address' => 'Junior Gurukul School, Seavri Dhaam, Kedwa Road, Bhikangaon, Panchamba, Madhya Pradesh 451331',
+            'currency_symbol' => '₹',
+            'receipt_prefix' => 'REC-2026-',
+            'timezone' => 'Asia/Kolkata',
+            'hero_badge' => 'CBSE Affiliated · Admissions Open 2026-27',
+            'hero_title' => 'Where Global Minds & Timeless Values Grow',
+            'hero_subtitle' => 'Junior Gurukul School, Bhikangaon — blending traditional values with modern, holistic CBSE education to shape confident, capable learners.',
+            'hero_image' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80',
+            'principal_message' => 'Welcome to Junior Gurukul School, Bhikangaon. We believe that true education nurtures both the intellect and character, fostering curiosity, moral strength, and academic brilliance.',
+            'stat_students' => '600+',
+            'stat_faculty' => '40+',
+            'stat_years' => '9+',
+            'stat_classes' => '20+',
+        ];
+
+        foreach ($settings as $k => $v) {
+            SchoolSetting::updateOrCreate(
+                ['school_id' => $school->id, 'key' => $k],
+                ['value' => $v, 'group' => 'general']
+            );
+        }
+
+        // 3. Academic Year
+        $academicYear = AcademicYear::create([
+            'school_id' => $school->id,
+            'name' => '2026 - 2027',
+            'start_date' => '2026-04-01',
+            'end_date' => '2027-03-31',
+            'is_current' => true,
             'status' => 'active',
         ]);
 
