@@ -86,7 +86,7 @@ Route::get('/setup-db', function () {
             storage_path('framework/views'),
             storage_path('framework/cache'),
             storage_path('logs'),
-            bootstrap_path('cache'),
+            base_path('bootstrap/cache'),
         ];
 
         foreach ($storageDirs as $dir) {
