@@ -50,61 +50,10 @@ class DemoSchoolSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // 2. Create Secondary School for Multi-Tenant Isolation Testing (Green Valley - ID 2)
-        $school2 = School::create([
-            'name' => 'Green Valley International School',
-            'code' => 'GVIS001',
-            'domain' => 'greenvalley.edu',
-            'tagline' => 'Excellence in Global Education',
-            'phone' => '+91 98765 43210',
-            'email' => 'admin@greenvalley.edu',
-            'address' => 'Knowledge Park II, Greater Noida, Delhi NCR - 201310',
-            'principal_name' => 'Dr. Suresh Mehta',
-            'status' => 'active',
-        ]);
-
-        // 3. Settings for Primary School
-        $settings = [
-            'school_name' => 'Junior Gurukul School',
-            'school_tagline' => 'School · Bhikangaon, M.P.',
-            'school_email' => 'info@juniorgurukulschool.in',
-            'school_phone' => '096176 14788',
-            'school_address' => 'Junior Gurukul School, Seavri Dhaam, Kedwa Road, Bhikangaon, Panchamba, Madhya Pradesh 451331',
-            'currency_symbol' => '₹',
-            'receipt_prefix' => 'REC-2026-',
-            'timezone' => 'Asia/Kolkata',
-            'hero_badge' => 'CBSE Affiliated · Admissions Open 2026-27',
-            'hero_title' => 'Where Global Minds & Timeless Values Grow',
-            'hero_subtitle' => 'Junior Gurukul School, Bhikangaon — blending traditional values with modern, holistic CBSE education to shape confident, capable learners.',
-            'hero_image' => 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1800&q=80',
-            'principal_message' => 'Welcome to Junior Gurukul School, Bhikangaon. We believe that true education nurtures both the intellect and character, fostering curiosity, moral strength, and academic brilliance.',
-            'stat_students' => '600+',
-            'stat_faculty' => '40+',
-            'stat_years' => '9+',
-            'stat_classes' => '20+',
-        ];
-
-        foreach ($settings as $k => $v) {
-            SchoolSetting::updateOrCreate(
-                ['school_id' => $school->id, 'key' => $k],
-                ['value' => $v, 'group' => 'general']
-            );
-        }
-
-        // Academic Year
-        $academicYear = AcademicYear::create([
-            'school_id' => $school->id,
-            'name' => '2026 - 2027',
-            'start_date' => '2026-04-01',
-            'end_date' => '2027-03-31',
-            'is_current' => true,
-            'status' => 'active',
-        ]);
-
         // 4. Seed User Accounts for All System Roles
-        // Super Admin (Global - school_id: null)
+        // Super Admin
         $superAdmin = User::create([
-            'school_id' => null,
+            'school_id' => $school->id,
             'name' => 'Super Administrator',
             'email' => 'superadmin@system.com',
             'role_name' => 'super_admin',
@@ -113,25 +62,13 @@ class DemoSchoolSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // School Admin 1 (Junior Gurukul School)
-        $admin1 = User::create([
+        // School Admin (Junior Gurukul School)
+        $admin = User::create([
             'school_id' => $school->id,
-            'name' => 'School Admin (Junior Gurukul)',
+            'name' => 'School Admin',
             'email' => 'admin@juniorgurukulschool.in',
             'role_name' => 'school_admin',
             'phone' => '+91 98765 43210',
-            'password' => Hash::make('password123'),
-            'status' => 'active',
-        ]);
-        $admin = $admin1;
-
-        // School Admin 2 (Green Valley International School)
-        $admin2 = User::create([
-            'school_id' => $school2->id,
-            'name' => 'School Admin (Green Valley)',
-            'email' => 'admin@greenvalley.edu',
-            'role_name' => 'school_admin',
-            'phone' => '+91 98765 99999',
             'password' => Hash::make('password123'),
             'status' => 'active',
         ]);
@@ -313,6 +250,14 @@ class DemoSchoolSeeder extends Seeder
                 'qual' => 'Acharya in Sanskrit, M.A.',
                 'desig' => 'Sanskar & Cultural Mentor',
                 'photo' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=500&q=80'
+            ],
+            [
+                'name' => 'New Faculty (Unassigned)',
+                'email' => 'new.teacher@juniorgurukulschool.in',
+                'sub' => 'Unassigned',
+                'qual' => 'B.Ed.',
+                'desig' => 'Junior Faculty Member',
+                'photo' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=500&q=80'
             ]
         ];
 

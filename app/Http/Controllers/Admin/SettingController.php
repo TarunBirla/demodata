@@ -138,6 +138,10 @@ class SettingController extends Controller
             'phone' => 'nullable|string',
         ]);
 
+        if (auth()->user()->role_name === 'school_admin' && $validated['role_name'] === 'super_admin') {
+            return redirect()->route('admin.settings.index')->with('error', 'Access Restricted: School Admin cannot create Super Admin accounts.');
+        }
+
         $user = User::create([
             'school_id' => $validated['school_id'] ?? auth()->user()->school_id ?? 1,
             'name' => $validated['name'],
@@ -215,6 +219,10 @@ class SettingController extends Controller
             'status' => 'required|string|in:active,inactive',
         ]);
 
+        if (auth()->user()->role_name === 'school_admin' && ($user->role_name === 'super_admin' || $validated['role_name'] === 'super_admin')) {
+            return redirect()->route('admin.settings.index')->with('error', 'Access Restricted: School Admin cannot modify Super Admin accounts.');
+        }
+
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -237,8 +245,12 @@ class SettingController extends Controller
     {
         $user = User::findOrFail($id);
 
+        if (auth()->user()->role_name === 'school_admin' && $user->role_name === 'super_admin') {
+            return redirect()->route('admin.settings.index')->with('error', 'Access Restricted: School Admin cannot delete Super Admin accounts.');
+        }
+
         if ($user->id === auth()->id()) {
-            return redirect()->route('admin.settings.index')->with('error', 'You cannot delete your own active Super Admin account!');
+            return redirect()->route('admin.settings.index')->with('error', 'You cannot delete your own active account!');
         }
 
         $user->delete();

@@ -266,15 +266,27 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::put('/cms/gallery/{id}', [CMSController::class, 'updateGallery'])->name('cms.gallery.update')->middleware('role:super_admin,school_admin');
     Route::delete('/cms/gallery/{id}', [CMSController::class, 'destroyGallery'])->name('cms.gallery.destroy')->middleware('role:super_admin,school_admin');
 
-    // System Settings & Roles (SUPER ADMIN ONLY)
-    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:super_admin');
-    Route::post('/settings', [SettingController::class, 'updateSettings'])->name('settings.update')->middleware('role:super_admin');
+    // System Settings & User Management (SUPER ADMIN & SCHOOL ADMIN)
+    Route::get('/settings', [SettingController::class, 'index'])->name('settings.index')->middleware('role:super_admin,school_admin');
+    Route::post('/settings', [SettingController::class, 'updateSettings'])->name('settings.update')->middleware('role:super_admin,school_admin');
     Route::post('/settings/schools', [SettingController::class, 'storeSchool'])->name('settings.school.store')->middleware('role:super_admin');
     Route::put('/settings/schools/{id}', [SettingController::class, 'updateSchool'])->name('settings.school.update')->middleware('role:super_admin');
     Route::post('/settings/roles', [SettingController::class, 'storeRole'])->name('settings.role.store')->middleware('role:super_admin');
     Route::put('/settings/roles/{id}', [SettingController::class, 'updateRole'])->name('settings.role.update')->middleware('role:super_admin');
     Route::delete('/settings/roles/{id}', [SettingController::class, 'destroyRole'])->name('settings.role.destroy')->middleware('role:super_admin');
-    Route::post('/settings/users', [SettingController::class, 'storeUserAccount'])->name('settings.user.store')->middleware('role:super_admin');
-    Route::put('/settings/users/{id}', [SettingController::class, 'updateUserAccount'])->name('settings.user.update')->middleware('role:super_admin');
-    Route::delete('/settings/users/{id}', [SettingController::class, 'destroyUserAccount'])->name('settings.user.destroy')->middleware('role:super_admin');
+    Route::post('/settings/users', [SettingController::class, 'storeUserAccount'])->name('settings.user.store')->middleware('role:super_admin,school_admin');
+    Route::put('/settings/users/{id}', [SettingController::class, 'updateUserAccount'])->name('settings.user.update')->middleware('role:super_admin,school_admin');
+    Route::delete('/settings/users/{id}', [SettingController::class, 'destroyUserAccount'])->name('settings.user.destroy')->middleware('role:super_admin,school_admin');
+
+    // Specialized Modules: Library, Transport, HR Staff
+    Route::get('/library', [\App\Http\Controllers\Admin\LibraryController::class, 'index'])->name('library.index')->middleware('role:super_admin,school_admin,librarian');
+    Route::post('/library/books', [\App\Http\Controllers\Admin\LibraryController::class, 'storeBook'])->name('library.books.store')->middleware('role:super_admin,school_admin,librarian');
+    Route::post('/library/issue', [\App\Http\Controllers\Admin\LibraryController::class, 'issueBook'])->name('library.issue.store')->middleware('role:super_admin,school_admin,librarian');
+
+    Route::get('/transport', [\App\Http\Controllers\Admin\TransportController::class, 'index'])->name('transport.index')->middleware('role:super_admin,school_admin,transport_manager');
+    Route::post('/transport/vehicles', [\App\Http\Controllers\Admin\TransportController::class, 'storeVehicle'])->name('transport.vehicles.store')->middleware('role:super_admin,school_admin,transport_manager');
+    Route::post('/transport/routes', [\App\Http\Controllers\Admin\TransportController::class, 'storeRoute'])->name('transport.routes.store')->middleware('role:super_admin,school_admin,transport_manager');
+
+    Route::get('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('staff.index')->middleware('role:super_admin,school_admin,hr_manager');
+    Route::post('/staff', [\App\Http\Controllers\Admin\StaffController::class, 'store'])->name('staff.store')->middleware('role:super_admin,school_admin,hr_manager');
 });

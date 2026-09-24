@@ -73,17 +73,14 @@ class DashboardController extends Controller
             $roleContext['myHomework'] = $myHomework;
         } elseif ($userRole === 'student') {
             $studentObj = Student::where('user_id', $user->id)->with(['schoolClass', 'section'])->first();
-            if (! $studentObj) {
-                $studentObj = Student::where('school_id', $schoolId)->first();
-            }
 
-            $myFeeDues = StudentFee::where('student_id', $studentObj->id ?? 0)->get();
-            $myPayments = FeePayment::where('student_id', $studentObj->id ?? 0)->get();
-            $myAttendanceCount = StudentAttendance::where('student_id', $studentObj->id ?? 0)->where('status', 'present')->count();
-            $totalMyAttendance = StudentAttendance::where('student_id', $studentObj->id ?? 0)->count();
-            $myAttendancePct = $totalMyAttendance > 0 ? round(($myAttendanceCount / $totalMyAttendance) * 100, 1) : 95.0;
+            $myFeeDues = $studentObj ? StudentFee::where('student_id', $studentObj->id)->get() : collect();
+            $myPayments = $studentObj ? FeePayment::where('student_id', $studentObj->id)->get() : collect();
+            $myAttendanceCount = $studentObj ? StudentAttendance::where('student_id', $studentObj->id)->where('status', 'present')->count() : 0;
+            $totalMyAttendance = $studentObj ? StudentAttendance::where('student_id', $studentObj->id)->count() : 0;
+            $myAttendancePct = $totalMyAttendance > 0 ? round(($myAttendanceCount / $totalMyAttendance) * 100, 1) : 0.0;
 
-            $myHomework = Homework::where('class_id', $studentObj->class_id ?? 0)->latest()->take(5)->get();
+            $myHomework = ($studentObj && $studentObj->class_id) ? Homework::where('class_id', $studentObj->class_id)->latest()->take(5)->get() : collect();
 
             $roleContext['title'] = 'Student Portal Dashboard';
             $roleContext['subtitle'] = 'Welcome, ' . ($studentObj->full_name ?? $user->name) . ' (' . ($studentObj->schoolClass->name ?? 'Grade') . ' - ' . ($studentObj->section->name ?? 'Section') . ')';
@@ -94,9 +91,6 @@ class DashboardController extends Controller
             $roleContext['myHomework'] = $myHomework;
         } elseif ($userRole === 'parent') {
             $parentObj = ParentObject::where('user_id', $user->id)->with('students.schoolClass')->first();
-            if (! $parentObj) {
-                $parentObj = ParentObject::where('school_id', $schoolId)->with('students.schoolClass')->first();
-            }
 
             $children = $parentObj ? $parentObj->students : collect();
             $childrenCount = $children->count();

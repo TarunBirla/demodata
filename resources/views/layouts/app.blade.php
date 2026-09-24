@@ -247,10 +247,31 @@
             </a>
             @endif
 
-            @if($isSuperAdmin)
+            @if($isAdmin || $isLibrarian)
+            <div class="menu-header">Library</div>
+            <a href="{{ route('admin.library.index') }}" class="nav-link-custom {{ request()->routeIs('admin.library*') ? 'active' : '' }}">
+                <i class="bi bi-book-half"></i> Library Catalog
+            </a>
+            @endif
+
+            @if($isAdmin || $isTransport)
+            <div class="menu-header">Transport</div>
+            <a href="{{ route('admin.transport.index') }}" class="nav-link-custom {{ request()->routeIs('admin.transport*') ? 'active' : '' }}">
+                <i class="bi bi-bus-front"></i> Fleet & Routes
+            </a>
+            @endif
+
+            @if($isAdmin || $isHr)
+            <div class="menu-header">Human Resources</div>
+            <a href="{{ route('admin.staff.index') }}" class="nav-link-custom {{ request()->routeIs('admin.staff*') ? 'active' : '' }}">
+                <i class="bi bi-person-workspace"></i> Staff & Payroll
+            </a>
+            @endif
+
+            @if($isAdmin)
             <div class="menu-header">System</div>
             <a href="{{ route('admin.settings.index') }}" class="nav-link-custom {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
-                <i class="bi bi-gear"></i> Settings & Roles
+                <i class="bi bi-gear"></i> Settings & Users
             </a>
             @endif
         </div>

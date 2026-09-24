@@ -191,6 +191,24 @@ class StudentController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'Access Restricted: You can only view your own student profile.');
         }
 
+        if ($user->role_name === 'teacher') {
+            $teacherObj = $user->teacher ?? \App\Models\Teacher::where('user_id', $user->id)->first();
+            $teacherId = $teacherObj?->id;
+            $teacherIds = $teacherId ? [$teacherId] : [];
+            $assignedSecIds = Section::whereIn('teacher_id', $teacherIds)->pluck('id')->toArray();
+            $ttSecIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('section_id')->toArray();
+            $ttClassIds = \App\Models\Timetable::whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $csClassIds = \Illuminate\Support\Facades\DB::table('class_subject')->whereIn('teacher_id', $teacherIds)->pluck('class_id')->toArray();
+            $secClassIds = Section::whereIn('id', array_merge($assignedSecIds, $ttSecIds))->pluck('class_id')->toArray();
+
+            $allAssignedSecIds = array_unique(array_merge($assignedSecIds, $ttSecIds));
+            $allAssignedClassIds = array_unique(array_merge($ttClassIds, $csClassIds, $secClassIds));
+
+            if (!in_array($student->class_id, $allAssignedClassIds) && !in_array($student->section_id, $allAssignedSecIds)) {
+                return redirect()->route('admin.dashboard')->with('error', 'Access Restricted: You can only view student profiles for your assigned classes.');
+            }
+        }
+
         if ($user->role_name === 'parent') {
             $parentProfile = $user->parentProfile;
             $parentStudentIds = $parentProfile ? $parentProfile->students()->pluck('students.id')->toArray() : [];
